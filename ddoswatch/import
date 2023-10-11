@@ -1,0 +1,36 @@
+import csv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app your_module import Groups  # Assurez-vous d'importer la classe Groups de votre module
+
+# Spécifiez le chemin vers votre fichier CSV
+csv_file = 'chemin/vers/votre/fichier.csv'
+
+# Remplacez 'sqlite:///mydatabase.db' par votre connexion à la base de données
+database_url = 'sqlite:///mydatabase.db'
+
+# Créez une connexion à la base de données
+engine = create_engine(database_url)
+
+# Créez une session SQLAlchemy
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Ouvrez le fichier CSV en mode lecture
+with open(csv_file, 'r') as file:
+    csv_reader = csv.reader(file)
+    next(csv_reader)  # Ignorez la première ligne si elle contient des en-têtes de colonnes
+
+    for row in csv_reader:
+        group_name = row[0]  # La première colonne contient le nom du groupe
+
+        # Créez un objet Groups et insérez-le dans la base de données
+        group = Groups(name=group_name)
+        session.add(group)
+
+# Validez les changements
+session.commit()
+
+# Fermez la session
+session.close()
+
