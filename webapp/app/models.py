@@ -1,12 +1,11 @@
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
 
-
 class Medias(Model):
-    # tag twitter etc...
+    # tag pour le type de media twitter etc...
     id = Column(Integer, primary_key=True)
     mname =  Column(String(150), unique = True, nullable=False)
     comm = relationship("Comms", back_populates="media")
@@ -31,12 +30,13 @@ class Tags(Model):
         return self.tname
 
 class GroupToolAssociation(Model):
+    # Join Tags pour les outils utilisés, nom de botnets
     __tablename__ = 'group_tool_association'
     group_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
     tool_id = Column(Integer, ForeignKey('tools.id'), primary_key=True)
 
 class Tools(Model):
-    # Tag to a tool ddossia etc
+    # Tags pour les outils utilisés, nom de botnets
     id = Column(Integer, primary_key=True)
     toolname =  Column(String(150), unique = True, nullable=False)
     note =  Column(Text(length=4096))
@@ -60,6 +60,10 @@ class Comms(Model):
     comm_group= relationship("Groups", back_populates="comm")
     media_id = Column(Integer, ForeignKey('medias.id'))
     media = relationship("Medias", back_populates="comm")
+    eyetelex = Column(Boolean, default=True)
+    first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
+    last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
+ 
 
     def __repr__(self):
         return self.link
@@ -69,8 +73,8 @@ class Groups(Model):
     # Group itself
     id = Column(Integer, primary_key=True)
     name =  Column(String(150), unique = True, nullable=False)
-    first_seen = Column(DateTime, default=datetime.utcnow)
-    last_seen = Column(DateTime, default=datetime.utcnow)
+    first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
+    last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
     comm = relationship("Comms", back_populates="comm_group")
     tags = relationship("Tags", secondary='group_tag_association', back_populates="groups")
     tools = relationship("Tools", secondary='group_tool_association', back_populates="groups")
