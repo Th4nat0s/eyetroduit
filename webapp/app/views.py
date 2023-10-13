@@ -11,7 +11,7 @@ class MediasView(ModelView):
     datamodel = SQLAInterface(Medias)
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
-    list_columns = ['comm_group','link', 'media', 'eyetelex']
+    list_columns = ['comm_group','last_seen','link', 'media', 'eyetelex']
 class TagsView(ModelView):
     datamodel = SQLAInterface(Tags)
     list_columns = ['tname','groups']
