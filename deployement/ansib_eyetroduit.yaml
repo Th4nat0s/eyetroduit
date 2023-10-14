@@ -21,7 +21,7 @@
         - libapache2-mod-wsgi-py3
         - python3.8-venv
   - name: create directory
-    fi$le:
+    file:
       path: /var/www/eyetroduit
       state: directory
       mode: "u=rwx,g=wx,o="
@@ -29,7 +29,7 @@
     shell: /bin/rm -rf /tmp/repos
   - name: Clone github repository
     git:
-      repo: git@github.com:Th4nat0s/eyetroduit_website.git
+      repo: git@github.com:Th4nat0s/eyetroduit.git
       dest: /tmp/repos/
       clone: yes
       update: yes
