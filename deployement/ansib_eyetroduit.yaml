@@ -20,6 +20,8 @@
         - apache2
         - libapache2-mod-wsgi-py3
         - python3.8-venv
+        - certbot
+        - python3-certbot-apache
   - name: create directory
     file:
       path: /var/www/eyetroduit
@@ -58,5 +60,25 @@
       src: /tmp/repos/deployement/002-eyetroduit.conf
       dest: /etc/apache2/sites-enabled
       remote_src: yes
+  - name: Create certbot folder
+    shell:  mkdir /var/www/html/.well-known/acme-challenge -p
+  - name: Attrib certbot rights
+    shell: chown wwwroot  /var/www/html/.well-known/acme-challenge
+  - name: create certbot folder
+    shell:mkdir -p /etc/letsencrypt/live/xakep.in
+  - name: Create certs 
+    shell: openssl req -new -x509 -nodes -out /etc/letsencrypt/live/xakep.in/cert.pem -keyout /etc/letsencrypt/live/xakep.in/privkey.pem -days 365 -subj "/CN=xakep.in"
+  - name: disable default apache sites
+    shell: a2dissite 000-default
+  - name: enable wesite
+    shell: a2ensite 002-eyetroduit
+  - name: enable ssl
+    shell: a2enmode ssl
   - name: startapache
     shell: systemctl start apache2
+  - name: launch certbot
+    shell: sudo certbot --apache -m alt.x3-1oqf7v3a@whatagarbage.com --agree-tos -n  --domains xakep.in
+  - name: restartapache
+    shell: systemctl restart apache2
+ 
+
