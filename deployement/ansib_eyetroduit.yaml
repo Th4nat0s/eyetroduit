@@ -1,0 +1,58 @@
+---
+
+- name: Profil EyeTroduit
+  strategy: free
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+  #  - name: Apt update
+  #    apt:
+  #      update_cache: yes
+  #  - name: Update packages
+  #    apt:
+  #      name: "*"
+  #      state: latest
+  - name: Install packages
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-wsgi-py3
+        - python3.8-venv
+  - name: create directory
+    fi$le:
+      path: /var/www/eyetroduit
+      state: directory
+      mode: "u=rwx,g=wx,o="
+  - name: remove github copy
+    shell: /bin/rm -rf /tmp/repos
+  - name: Clone github repository
+    git:
+      repo: git@github.com:Th4nat0s/eyetroduit_website.git
+      dest: /tmp/repos/
+      clone: yes
+      update: yes
+      accept_hostkey: yes
+    become: no
+  - name: remove .git
+    shell: /bin/rm -rf /tmp/repos/.git
+  - name: push in folder
+    copy:
+      src: /tmp/repos/webapp
+      dest: /var/www/eyetroduit
+      remote_src: yes
+  - name: Créer le répertoire pour l'environnement virtuel
+    file:
+      path: /var/www/eyetroduit/venv_eyetroduit
+      state: directory
+      mode: "u=rwx,g=wx,o="
+  - name: create venv
+    shell: python3 -m venv /var/www/eyetroduit/venv_eyetroduit
+  - name: install pip packages
+    ansible.builtin.pip:
+      requirements: /var/www/eyetroduit/requirements.txt
+      virtualenv: /var/www/eyetroduit/venv_eyetroduit
+  - name: init database
+    shell: python3 /var/www/eyetroduit/initdb.py
+ 
