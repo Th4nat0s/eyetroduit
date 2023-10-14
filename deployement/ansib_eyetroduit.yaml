@@ -7,13 +7,13 @@
   become: yes
 
   tasks:
-  #  - name: Apt update
-  #    apt:
-  #      update_cache: yes
-  #  - name: Update packages
-  #    apt:
-  #      name: "*"
-  #      state: latest
+    - name: Apt update
+      apt:
+        update_cache: yes
+    - name: Update packages
+      apt:
+        name: "*"
+        state: latest
   - name: Install packages
     apt:
       name:
@@ -60,8 +60,20 @@
       src: /tmp/repos/deployement/002-eyetroduit.conf
       dest: /etc/apache2/sites-available
       remote_src: yes
+  - name: Copy datatbase
+    copy:
+      src: /var/www/eyetroduit/app_template.db
+      dest: /var/www/eyetroduit/app.db
+      remote_src: yes
+  - name: copy setup
+    copy:
+      src: /var/www/eyetroduit/config_template.py
+      dest: /var/www/eyetroduit/config.py
+      remote_src: yes
   - name: Create certbot folder
     shell:  mkdir /var/www/html/.well-known/acme-challenge -p
+  - name: Attrib www rights
+    shell: chown www-data:www-data /var/www/eyetroduit
   - name: Attrib certbot rights
     shell: chown www-data:www-data /var/www/html/.well-known/acme-challenge
   - name: create certbot folder
@@ -76,9 +88,7 @@
     shell: a2enmod ssl
   - name: startapache
     shell: systemctl start apache2
-  # - name: launch certbot
-  #    shell: sudo certbot --apache -m alt.x3-1oqf7v3a@whatagarbage.com --agree-tos -n  --domains xakep.in
+  - name: launch certbot
+    shell: sudo certbot --apache -m alt.x3-1oqf7v3a@whatagarbage.com --agree-tos -n  --domains xakep.in
   - name: restartapache
     shell: systemctl restart apache2
- 
-
