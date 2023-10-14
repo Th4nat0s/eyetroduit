@@ -7,13 +7,13 @@
   become: yes
 
   tasks:
-    - name: Apt update
-      apt:
-        update_cache: yes
-    - name: Update packages
-      apt:
-        name: "*"
-        state: latest
+  - name: Apt update
+    apt:
+      update_cache: yes
+  - name: Update packages
+    apt:
+      name: "*"
+      state: latest
   - name: Install packages
     apt:
       name:
@@ -25,6 +25,11 @@
   - name: create directory
     file:
       path: /var/www/eyetroduit
+      state: directory
+      mode: "u=rwx,g=wx,o="
+  - name: create directory
+    file:
+      path: /var/www/root
       state: directory
       mode: "u=rwx,g=wx,o="
   - name: remove github copy
@@ -43,6 +48,11 @@
     copy:
       src: /tmp/repos/webapp/
       dest: /var/www/eyetroduit
+      remote_src: yes
+  - name: push in folder
+    copy:
+      src: /tmp/repos/root/
+      dest: /var/www/root
       remote_src: yes
   - name: Créer le répertoire pour l'environnement virtuel
     file:
@@ -78,6 +88,8 @@
     shell: chown www-data:www-data /var/www/html/.well-known/acme-challenge
   - name: create certbot folder
     shell: mkdir -p /etc/letsencrypt/live/xakep.in
+  - name: create root folder
+    shell: mkdir -p /var/www/root
   - name: Create certs
     shell: openssl req -new -x509 -nodes -out /etc/letsencrypt/live/xakep.in/cert.pem -keyout /etc/letsencrypt/live/xakep.in/privkey.pem -days 365 -subj "/CN=xakep.in"
   - name: disable default apache sites
