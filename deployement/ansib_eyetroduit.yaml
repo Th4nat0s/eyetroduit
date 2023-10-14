@@ -76,8 +76,8 @@
     shell: a2enmod ssl
   - name: startapache
     shell: systemctl start apache2
-  - name: launch certbot
-    shell: sudo certbot --apache -m alt.x3-1oqf7v3a@whatagarbage.com --agree-tos -n  --domains xakep.in
+  # - name: launch certbot
+  #    shell: sudo certbot --apache -m alt.x3-1oqf7v3a@whatagarbage.com --agree-tos -n  --domains xakep.in
   - name: restartapache
     shell: systemctl restart apache2
  
