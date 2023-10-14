@@ -39,7 +39,7 @@
     shell: /bin/rm -rf /tmp/repos/.git
   - name: push in folder
     copy:
-      src: /tmp/repos/webapp
+      src: /tmp/repos/webapp/
       dest: /var/www/eyetroduit
       remote_src: yes
   - name: Créer le répertoire pour l'environnement virtuel
@@ -53,6 +53,10 @@
     ansible.builtin.pip:
       requirements: /var/www/eyetroduit/requirements.txt
       virtualenv: /var/www/eyetroduit/venv_eyetroduit
-  - name: init database
-    shell: python3 /var/www/eyetroduit/initdb.py
- 
+  - name: Copy apache conh
+    copy:
+      src: /tmp/repos/deployement/002-eyetroduit.conf
+      dest: /etc/apache2/sites-enabled
+      remote_src: yes
+  - name: startapache
+    shell: systemctl start apache2
