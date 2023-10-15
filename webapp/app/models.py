@@ -125,4 +125,3 @@ class Configs(Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     md5 = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
-

@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request, Response
 # from flask import Flask, jsonify, render_template, request, send_file
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_appbuilder import ModelView, ModelRestApi, BaseView
+from flask_appbuilder import ModelView, ModelRestApi, BaseView, has_access
 from flask_appbuilder.api import expose
 from flask_appbuilder.models.decorators import renders
 
@@ -19,6 +19,7 @@ class VictimsView(ModelView):
     base_order = ('timestamp', 'desc()')
 
     @expose('/conf_download/<filename>')
+    @has_access  # toute personne authentifiée
     def conf_download(self, filename):
         est_valide = lambda filename: all(c in "0123456789abcdefghijklmnopqrstuvwxyz_. " for c in filename)
         file_path = db.app.config.get('DDOSIA')
@@ -50,24 +51,32 @@ class VictimsView(ModelView):
 class ConfigsView(ModelView):
     datamodel = SQLAInterface(Configs)
     list_columns = ['timestamp', 'md5', 'download']
-
+    base_order = ('timestamp', 'desc()')
 class ApiKeysView(ModelView):
     datamodel = SQLAInterface(ApiKeys)
-
+    list_columns = ['key','active']
 class ToolsView(ModelView):
     datamodel = SQLAInterface(Tools)
+    list_columns = ['toolname','groups']
 class MediasView(ModelView):
     datamodel = SQLAInterface(Medias)
+    list_columns = ['mname','comm']
+    label_columns = {'mname': 'Media', 'comm': 'Links'}
 class TagsView(ModelView):
     datamodel = SQLAInterface(Tags)
     list_columns = ['tname','groups']
+    label_columns = {'tname': 'Tags', 'group': 'Groups name'}
+    base_order = ('tname', 'asc()')
 
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
     list_columns = ['comm_group','last_seen','link', 'media', 'eyetelex']
+    label_columns = {'comm_group': 'Groups Name', 'link': 'Links'}
+    base_order = ('comm_group.name', 'asc()')
 class GroupsView(ModelView):
     label_columns = {'name': 'Groups Name', 'comm': 'Links'}
     list_columns = ['name','tags', 'comm']
+    base_order = ('name', 'asc()')
     datamodel = SQLAInterface(Groups)
 
 class api(BaseView):
