@@ -31,11 +31,13 @@
       src: /tmp/repos/webapp/
       dest: /var/www/eyetroduit
       remote_src: yes
+      owner: www-data
   - name: push in folder
     copy:
       src: /tmp/repos/root/
       dest: /var/www/root
       remote_src: yes
+      owner: www-data
   - name: Créer le répertoire pour l'environnement virtuel
     file:
       path: /var/www/eyetroduit/venv_eyetroduit
