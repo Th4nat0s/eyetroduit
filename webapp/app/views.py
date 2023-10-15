@@ -17,6 +17,7 @@ class VictimsView(ModelView):
     datamodel = SQLAInterface(Victims)
     list_columns = ['timestamp', 'host', 'country', 'Filename']
     base_order = ('timestamp', 'desc()')
+    label_columns = {'timestamp': 'Timestamp UTC'}
 
     @expose('/conf_download/<filename>')
     @has_access  # toute personne authentifiée
