@@ -12,8 +12,12 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # Your App secret key
 SECRET_KEY = "RANDOMRANDOMRANDOMRANDOM"  # Change ME in production
 
+DBASE = os.path.join(basedir, "app.db")
+GEOIP = os.path.join(basedir, "rsc/GeoLite2-City.mmdb")
+DDOSIA = os.path.join(basedir, "ddosia/")
+
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "app.db")
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + DBASE
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
 
@@ -38,6 +42,9 @@ APP_NAME = "eYeTr0du1t"
 # AUTH_LDAP : Is for LDAP
 # AUTH_REMOTE_USER : Is for using REMOTE_USER from web server
 AUTH_TYPE = AUTH_DB
+
+CUSTOM_VIEW_TEMPLATE = 'custom_welcome.html'
+
 
 # Uncomment to setup Full admin role name
 # AUTH_ROLE_ADMIN = 'Admin'
@@ -98,7 +105,7 @@ IMG_UPLOAD_URL = "/static/uploads/"
 # APP_THEME = "bootstrap-theme.css"  # default bootstrap
 # APP_THEME = "cerulean.css"
 # APP_THEME = "amelia.css"
-APP_THEME = "cosmo.css"
+# APP_THEME = "cosmo.css"
 # APP_THEME = "cyborg.css"
 # APP_THEME = "flatly.css"
 # APP_THEME = "journal.css"

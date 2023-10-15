@@ -1,8 +1,9 @@
 *.pyc
 app.db
-./tmp
-./build/*
+tmp
+build/*
 .idea
 env
 venv
 *.sublime*
+ddosia/*.json

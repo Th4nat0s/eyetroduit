@@ -4,6 +4,13 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 
 
+class ApiKeys(Model):
+    # tag pour le type de media twitter etc...
+    id = Column(Integer, primary_key=True)
+    key =  Column(String(150), unique = True, nullable=False)
+    active = Column(Boolean, default=True)
+
+
 class Medias(Model):
     # tag pour le type de media twitter etc...
     id = Column(Integer, primary_key=True)
@@ -61,9 +68,12 @@ class Comms(Model):
     media_id = Column(Integer, ForeignKey('medias.id'))
     media = relationship("Medias", back_populates="comm")
     eyetelex = Column(Boolean, default=True)
+    first_seen = Column(DateTime, default=datetime.utcnow)
+    last_seen = Column(DateTime, default=datetime.utcnow)
+    ''' 
     first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
     last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
- 
+    '''
 
     def __repr__(self):
         return self.link
@@ -73,10 +83,45 @@ class Groups(Model):
     # Group itself
     id = Column(Integer, primary_key=True)
     name =  Column(String(150), unique = True, nullable=False)
-    first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
-    last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
+    # first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
+    # last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
+    first_seen = Column(DateTime, default=datetime.utcnow)
+    last_seen = Column(DateTime, default=datetime.utcnow)
     comm = relationship("Comms", back_populates="comm_group")
     tags = relationship("Tags", secondary='group_tag_association', back_populates="groups")
     tools = relationship("Tools", secondary='group_tool_association', back_populates="groups")
     def __repr__(self):
         return self.name
+
+class Victims(Model):
+    # DDosIA
+    __tablename__ = 'victim'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host = Column(String)
+    domain = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    country = Column(String)
+    endpoint = Column(String)
+    ip = Column(String)
+    lat = Column(String)
+    lon = Column(String)
+    filename = Column(String)
+
+class Configs(Model):
+    # Collected configs
+    __tablename__ = 'config'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    md5 = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+'''
+will be replaced with fab auth
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String)
+    api = Column(String)
+    push = Column(Integer)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+'''
+
