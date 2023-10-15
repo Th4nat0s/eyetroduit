@@ -1,4 +1,4 @@
-from flask import render_template, jsonify, request
+from flask import render_template, jsonify, request, Response
 # from flask import Flask, jsonify, render_template, request, send_file
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi, BaseView
@@ -32,7 +32,16 @@ class VictimsView(ModelView):
                 json_data = json.load(json_file)
 
             # Renvoyez une réponse JSON basée sur le contenu du fichier
-            return jsonify(json_data)
+            # j'utilise pas jsonify mais json.dumps() 
+            # avec l'argument indent pour formater la réponse JSON
+            json_str = json.dumps(json_data, indent=4)
+
+            # Créez une réponse Flask avec la chaîne JSON formatée
+            response = Response(json_str, content_type='application/json; charset=utf-8')
+            response.status_code = 200  # Code de statut HTTP OK
+
+            return response
+            # return jsonify(json_data, indent=4)
         else:
             # Gérez le cas où le fichier n'existe pas
             return jsonify({'error': 'Not Found'}), 404
