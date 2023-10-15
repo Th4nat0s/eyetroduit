@@ -1,11 +1,15 @@
 from flask_appbuilder import Model
+from flask import Markup as Esc
+from flask import url_for
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from flask_appbuilder.models.decorators import renders
+
 
 
 class ApiKeys(Model):
-    # tag pour le type de media twitter etc...
+    # tag pour le request API
     id = Column(Integer, primary_key=True)
     key =  Column(String(150), unique = True, nullable=False)
     active = Column(Boolean, default=True)
@@ -107,21 +111,18 @@ class Victims(Model):
     lon = Column(String)
     filename = Column(String)
 
+    def Filename(self):
+        ''' Create the download link '''
+        uri = url_for("VictimsView.conf_download", filename=self.filename )
+        return Esc(f'<a href="{uri}">{self.filename}</a>')
+
+    def __repr__(self):
+        return self.id
+
 class Configs(Model):
     # Collected configs
     __tablename__ = 'config'
     id = Column(Integer, primary_key=True, autoincrement=True)
     md5 = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
-
-'''
-will be replaced with fab auth
-class User(Base):
-    __tablename__ = 'user'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String)
-    api = Column(String)
-    push = Column(Integer)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-'''
 

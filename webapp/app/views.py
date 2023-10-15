@@ -3,18 +3,40 @@ from flask import render_template, jsonify, request
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi, BaseView
 from flask_appbuilder.api import expose
+from flask_appbuilder.models.decorators import renders
 
 from . import appbuilder, db
 from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys
 from .lib import adb, getandparse
 
 from flask_appbuilder import IndexView
-
+import os
+import json
 
 class VictimsView(ModelView):
     datamodel = SQLAInterface(Victims)
-    list_columns = ['timestamp', 'host', 'country', 'filename']
+    list_columns = ['timestamp', 'host', 'country', 'Filename']
     base_order = ('timestamp', 'desc()')
+
+    @expose('/conf_download/<filename>')
+    def conf_download(self, filename):
+        est_valide = lambda filename: all(c in "0123456789abcdefghijklmnopqrstuvwxyz_. " for c in filename)
+        file_path = db.app.config.get('DDOSIA')
+
+        file_path = os.path.join(file_path, filename)
+
+
+        if os.path.isfile(file_path) and est_valide:
+            # Chargez le contenu du fichier JSON
+            with open(file_path, 'r') as json_file:
+                json_data = json.load(json_file)
+
+            # Renvoyez une réponse JSON basée sur le contenu du fichier
+            return jsonify(json_data)
+        else:
+            # Gérez le cas où le fichier n'existe pas
+            return jsonify({'error': 'Not Found'}), 404
+
 
 class ConfigsView(ModelView):
     datamodel = SQLAInterface(Configs)
