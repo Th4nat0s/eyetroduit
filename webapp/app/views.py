@@ -14,6 +14,8 @@ from flask_appbuilder import IndexView
 class VictimsView(ModelView):
     datamodel = SQLAInterface(Victims)
     list_columns = ['timestamp', 'host', 'country', 'filename']
+    base_order = ('timestamp', 'desc()')
+
 class ConfigsView(ModelView):
     datamodel = SQLAInterface(Configs)
     list_columns = ['timestamp', 'md5', 'download']
