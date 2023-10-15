@@ -5,6 +5,9 @@ from flask_appbuilder import ModelView, ModelRestApi
 from . import appbuilder, db
 from .models import Groups, Comms, Tags, Medias, Tools
 
+from flask_appbuilder import IndexView
+
+
 class ToolsView(ModelView):
     datamodel = SQLAInterface(Tools)
 class MediasView(ModelView):
