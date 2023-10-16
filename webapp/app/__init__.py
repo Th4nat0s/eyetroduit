@@ -2,6 +2,7 @@ import logging
 
 from flask import Flask
 from flask_appbuilder import AppBuilder, SQLA
+from flask_migrate import Migrate
 
 """
  Logging configuration

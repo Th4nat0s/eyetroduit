@@ -13,20 +13,43 @@ from flask_appbuilder import IndexView
 import os
 import json
 
+
 class VictimsView(ModelView):
     datamodel = SQLAInterface(Victims)
     list_columns = ['timestamp', 'host', 'country', 'Filename']
     base_order = ('timestamp', 'desc()')
     label_columns = {'timestamp': 'Timestamp UTC'}
 
+    # Route qui file la last conf, need apikey
+    # accessible par tout le monde
+    @expose('/last_conf/<key>')
+    def last_conf(self, key):
+        # check Api KEy
+        db.session.query(Victims.filename).order_by(Victims.timestamp.desc()).first() 
+        auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+
+        if auth_valid:
+            # determine last config file
+            filename = db.session.query(Victims.filename).order_by(Victims.timestamp.desc()).first()
+            file_path = db.app.config.get('DDOSIA')
+            file_path = os.path.join(file_path, filename[0])
+            if os.path.isfile(file_path):
+                # Chargez le contenu du fichier JSON
+                with open(file_path, 'r') as json_file:
+                    json_data = json.load(json_file)
+                json_str = json.dumps(json_data, indent=4)
+                response = Response(json_str, content_type='application/json; charset=utf-8')
+                response.status_code = 200  # Code de statut HTTP OK
+            return response
+        return jsonify({'error': 'Not Found'}), 404
+
+
     @expose('/conf_download/<filename>')
     @has_access  # toute personne authentifiée
     def conf_download(self, filename):
         est_valide = lambda filename: all(c in "0123456789abcdefghijklmnopqrstuvwxyz_. " for c in filename)
         file_path = db.app.config.get('DDOSIA')
-
         file_path = os.path.join(file_path, filename)
-
 
         if os.path.isfile(file_path) and est_valide:
             # Chargez le contenu du fichier JSON

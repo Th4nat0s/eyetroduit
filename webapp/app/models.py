@@ -6,6 +6,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from flask_appbuilder.models.decorators import renders
 
+def dbversion():
+    return DBVERSION
 
 
 class ApiKeys(Model):
@@ -125,3 +127,6 @@ class Configs(Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     md5 = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+if __name__ == "__main__":
+    print (DBVERSION)
