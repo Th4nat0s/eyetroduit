@@ -93,6 +93,34 @@ class MediasView(ModelView):
     list_columns = ['mname','comm']
     label_columns = {'mname': 'Media', 'comm': 'Links'}
 
+    # curl -X POST -d "api_key=votre_api_key" https://..../mediasview/get_telegram_job
+    @expose('/get_telegram_job', methods=['POST'])
+    def last_conf(self):
+        '''
+            Get all the groups à Sucer, en telegram
+        '''
+
+        # validate key
+        key = request.form.get('api_key')
+        if not key:
+            return jsonify({'job': []}), 401
+        auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            # get telegram ID
+            media = db.session.query(Medias).filter(Medias.mname == "Telegram").first()
+            links = db.session.query(Comms.link).filter(Comms.eyetelex == True, Comms.media==media).all()
+            # convertis en array
+            olinks = []
+
+            # Split sur le last / pour faire plaisir à dave
+            for link in links:
+                index = link[0].rstrip('/').rfind('/')  # vire le last / et trouve le / d'après.
+                nom = link[0][index + 1:]
+                # olinks.append(link[0]) # For debug add all path
+                olinks.append(nom)
+            return jsonify({'job': olinks}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
+        return jsonify({'job': []}), 401
+
 
     # curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "uri": "urlX", "type": "Telegram"}' http://127.0.0.1:5000/mediasview/api_add_media
     # type est l'id telegram=1 
@@ -127,7 +155,6 @@ class MediasView(ModelView):
             return jsonify({'sucess': 'source added'}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
         else:
             return jsonify({'error': 'Not added, invalid api key'}), 401  # je dis pas apikey invalid sinon un pentest me fera chier.
-
 
 
 class TagsView(ModelView):
