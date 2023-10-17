@@ -22,10 +22,15 @@ class VictimsView(ModelView):
 
     # Route qui file la last conf, need apikey
     # accessible par tout le monde
-    @expose('/last_conf/<key>')
-    def last_conf(self, key):
+
+    # curl -X POST -d "api_key=votre_api_key" https://..../victimsview/ddosia_last_conf
+    @expose('/ddosia_last_conf', methods=['POST'])
+    def last_conf(self):
+        key = request.form.get('api_key')
+        if not key:
+            return jsonify({'error': 'Not Found'}), 404  # je dis pas apikey invalid sinon un pentest me fera chier.
         # check Api KEy
-        db.session.query(Victims.filename).order_by(Victims.timestamp.desc()).first() 
+        db.session.query(Victims.filename).order_by(Victims.timestamp.desc()).first()
         auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
 
         if auth_valid:
