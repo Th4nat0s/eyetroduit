@@ -2,6 +2,7 @@ from flask_appbuilder import Model
 from flask import Markup as Esc
 from flask import url_for
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean
+from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from flask_appbuilder.models.decorators import renders
@@ -72,12 +73,8 @@ class Comms(Model):
     media_id = Column(Integer, ForeignKey('medias.id'))
     media = relationship("Medias", back_populates="comm")
     eyetelex = Column(Boolean, default=True)
-    first_seen = Column(DateTime, default=datetime.utcnow)
-    last_seen = Column(DateTime, default=datetime.utcnow)
-    ''' 
-    first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
-    last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
-    '''
+    first_seen = Column(DateTime, default=func.now())
+    last_seen = Column(DateTime, default=func.now())
 
     def __repr__(self):
         return self.link
@@ -87,10 +84,8 @@ class Groups(Model):
     # Group itself
     id = Column(Integer, primary_key=True)
     name =  Column(String(150), unique = True, nullable=False)
-    # first_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
-    # last_seen = Column(DateTime, default=datetime.strftime(datetime.utcnow(), "%Y-%m-%d %H:%M:%S"))
-    first_seen = Column(DateTime, default=datetime.utcnow)
-    last_seen = Column(DateTime, default=datetime.utcnow)
+    first_seen = Column(DateTime, default=func.now())
+    last_seen = Column(DateTime, default=func.now())
     comm = relationship("Comms", back_populates="comm_group")
     tags = relationship("Tags", secondary='group_tag_association', back_populates="groups")
     tools = relationship("Tools", secondary='group_tool_association', back_populates="groups")
