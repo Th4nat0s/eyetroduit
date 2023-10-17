@@ -13,6 +13,16 @@ from .lib import adb, getandparse
 from flask_appbuilder import IndexView
 import os
 import json
+from datetime import datetime
+
+def valid_time_format(string):
+    format_attendu = "%Y-%m-%d %H:%M:%S"
+    try:
+        datetime.strptime(string, format_attendu)
+        return True
+    except ValueError:
+        return False
+
 
 
 class VictimsView(ModelView):
@@ -93,9 +103,9 @@ class MediasView(ModelView):
     list_columns = ['mname','comm']
     label_columns = {'mname': 'Media', 'comm': 'Links'}
 
-    # curl -X POST -d "api_key=votre_api_key" https://..../mediasview/get_telegram_job
-    @expose('/get_telegram_job', methods=['POST'])
-    def last_conf(self):
+    # curl -X POST -d "api_key=votre_api_key" https://..../mediasview/api_get_telegram_job
+    @expose('/api_get_telegram_job', methods=['POST'])
+    def api_get_telegram_job(self):
         '''
             Get all the groups à Sucer, en telegram
         '''
@@ -122,8 +132,50 @@ class MediasView(ModelView):
         return jsonify({'job': []}), 401
 
 
+    '''
+    curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "uri": "Xurl", "datetime": "2023-10-11 16:07:34"}' \
+    http://127.0.0.1:5000/mediasview/api_time_media
+
+    Format de temps YYYY-MM-DD HH:MM.SS
+    '''
+    @expose('/api_time_media', methods=['POST'])
+    def api_time_media(self):
+        '''
+        Route API pour ajouter un nouveau lien dans la db automagiquement.
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+
+        # check minima
+        if 'api_key' in data and 'uri' in data and 'datetime' in data:
+            key = data['api_key']
+        # check Api KEy
+        auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            uri = data['uri']
+            date = data['datetime']
+
+            urlo = db.session.query(Comms).filter(Comms.link==uri).first() # Find the url
+            if not urlo:
+                return jsonify({'error': 'media not found'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+
+            # Check le format de time "2023-10-11 16:07:34"
+            if not valid_time_format(date):
+                return jsonify({'error': 'datetime invalid'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+
+            # Arrivé ici c'est bon, update du last message
+            urlo.last_seen = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+
+            # bon maintenant on choppe le group relatif a cet url
+            if urlo.comm_group:
+                urlo.comm_group.last_seen =  datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+
+            db.session.commit()
+            return jsonify({'success': 'Timestamp added'}), 200
+        return jsonify({'error': 'Invalid API token'}), 401
+
+
     # curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "uri": "urlX", "type": "Telegram"}' http://127.0.0.1:5000/mediasview/api_add_media
-    # type est l'id telegram=1 
     @expose('/api_add_media', methods=['POST'])
     def add_media(self):
         '''
@@ -155,6 +207,7 @@ class MediasView(ModelView):
             return jsonify({'sucess': 'source added'}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
         else:
             return jsonify({'error': 'Not added, invalid api key'}), 401  # je dis pas apikey invalid sinon un pentest me fera chier.
+
 
 
 class TagsView(ModelView):
