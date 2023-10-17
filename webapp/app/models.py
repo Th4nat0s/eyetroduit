@@ -39,6 +39,7 @@ class Tags(Model):
     id = Column(Integer, primary_key=True)
     tname =  Column(String(150), unique = True, nullable=False)
     groups = relationship("Groups", secondary='group_tag_association', back_populates="tags")
+    comms = relationship("Comms", secondary='comm_tag_association', back_populates="tags")
 
     def __repr__(self):
         return self.tname
@@ -64,6 +65,11 @@ class GroupTagAssociation(Model):
     group_id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
+class CommTagAssociation(Model):
+    __tablename__ = 'comm_tag_association'
+    comm_id = Column(Integer, ForeignKey('comms.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
 class Comms(Model):
     # Communication for a group (twitter/telegram etc.. with link
     id = Column(Integer, primary_key=True)
@@ -75,6 +81,7 @@ class Comms(Model):
     eyetelex = Column(Boolean, default=True)
     first_seen = Column(DateTime, default=func.now())
     last_seen = Column(DateTime, default=func.now())
+    tags = relationship("Tags", secondary='comm_tag_association', back_populates="comms")
 
     def __repr__(self):
         return self.link

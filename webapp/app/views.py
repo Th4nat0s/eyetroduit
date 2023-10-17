@@ -218,7 +218,7 @@ class TagsView(ModelView):
 
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
-    list_columns = ['comm_group','last_seen','link', 'media', 'eyetelex']
+    list_columns = ['comm_group','tags','last_seen','link', 'media', 'eyetelex']
     label_columns = {'comm_group': 'Groups Name', 'link': 'Links'}
     base_order = ('comm_group.name', 'asc()')
 class GroupsView(ModelView):
