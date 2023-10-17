@@ -4,6 +4,7 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi, BaseView, has_access
 from flask_appbuilder.api import expose
 from flask_appbuilder.models.decorators import renders
+from sqlalchemy.exc import IntegrityError 
 
 from . import appbuilder, db
 from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys
@@ -91,6 +92,44 @@ class MediasView(ModelView):
     datamodel = SQLAInterface(Medias)
     list_columns = ['mname','comm']
     label_columns = {'mname': 'Media', 'comm': 'Links'}
+
+
+    # curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "uri": "urlX", "type": "Telegram"}' http://127.0.0.1:5000/mediasview/api_add_media
+    # type est l'id telegram=1 
+    @expose('/api_add_media', methods=['POST'])
+    def add_media(self):
+        '''
+        Route API pour ajouter un nouveau lien dans la db automagiquement.
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+
+        # check minima
+        if 'api_key' in data and 'uri' in data and 'type' in data:
+            key = data['api_key']
+        # check Api KEy
+        auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            uri = data['uri']
+            media_type = data['type']
+            media = db.session.query(Medias).filter(Medias.mname == media_type).first()
+            if not media:
+                return jsonify({'error': 'Not added, Uknow type'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+            new_comm = Comms(link=uri, eyetelex=False, media=media )  # Create new record
+            db.session.add(new_comm)
+            try:
+                # save l'objet
+                db.session.commit()
+            except IntegrityError as e:
+                # Si pas content, c'est déja existant , on rollbck
+                db.session.rollback()  
+                return jsonify({'error': 'Not added, Already present'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+            return jsonify({'sucess': 'source added'}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
+        else:
+            return jsonify({'error': 'Not added, invalid api key'}), 401  # je dis pas apikey invalid sinon un pentest me fera chier.
+
+
+
 class TagsView(ModelView):
     datamodel = SQLAInterface(Tags)
     list_columns = ['tname','groups']

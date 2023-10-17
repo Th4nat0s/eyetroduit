@@ -66,9 +66,7 @@ class GroupTagAssociation(Model):
 class Comms(Model):
     # Communication for a group (twitter/telegram etc.. with link
     id = Column(Integer, primary_key=True)
-    #cname =  Column(String(150), unique = True, nullable=False)
     link =  Column(String(4096), unique= True, nullable=False )
-    # group = relationship("Groups", back_populates="comm_group")
     comm_group_id = Column(Integer, ForeignKey('groups.id'))
     comm_group= relationship("Groups", back_populates="comm")
     media_id = Column(Integer, ForeignKey('medias.id'))
