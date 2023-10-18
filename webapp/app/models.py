@@ -86,6 +86,14 @@ class Comms(Model):
     def __repr__(self):
         return self.link
 
+    @renders('eyetelex')
+    def nice_eyetelex(self):
+        if self.eyetelex:
+            return Esc('<i class="fa fa-check-square-o"></i>')
+        else:
+            return Esc('<i class="fa fa-square-o"></i>')
+
+
     def alltags(self):
         tags = []
         # Render nice html pills
@@ -104,6 +112,7 @@ class Comms(Model):
         for tag in tags:
             html += f'<span class="label label-primary">{tag}</span> '
         return Esc(html)
+
 
 class Groups(Model):
     # Group itself

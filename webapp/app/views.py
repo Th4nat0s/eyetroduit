@@ -224,9 +224,10 @@ class TagsView(ModelView):
 # Affichage des liens 
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
-    list_columns = ['comm_group','alltags', 'last_seen','link', 'media', 'eyetelex']
-    label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags'}
+    list_columns = ['comm_group','alltags', 'last_seen','link', 'media', 'nice_eyetelex']
+    label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags', 'nice_eyetelex': 'Fetch'}
     base_order = ('comm_group.name', 'asc()')
+
 class GroupsView(ModelView):
     label_columns = {'name': 'Groups Name', 'comm': 'Links', 'nice_tags': 'Tags'}
     list_columns = ['name','nice_tags', 'comm']
