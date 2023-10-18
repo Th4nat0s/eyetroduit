@@ -228,8 +228,8 @@ class CommsView(ModelView):
     label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags'}
     base_order = ('comm_group.name', 'asc()')
 class GroupsView(ModelView):
-    label_columns = {'name': 'Groups Name', 'comm': 'Links'}
-    list_columns = ['name','tags', 'comm']
+    label_columns = {'name': 'Groups Name', 'comm': 'Links', 'nice_tags': 'Tags'}
+    list_columns = ['name','nice_tags', 'comm']
     base_order = ('name', 'asc()')
     datamodel = SQLAInterface(Groups)
 

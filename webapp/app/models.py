@@ -89,7 +89,7 @@ class Comms(Model):
     def alltags(self):
         tags = []
         # Render nice html pills
-        html = "<h6>"
+        html = ""
         # Get all tag name for attached groups
         if self.comm_group:
             for tag in self.comm_group.tags:
@@ -103,7 +103,7 @@ class Comms(Model):
         # Render nice html pills
         for tag in tags:
             html += f'<span class="label label-primary">{tag}</span> '
-        return Esc(html + "</h6>")
+        return Esc(html)
 
 class Groups(Model):
     # Group itself
@@ -114,10 +114,24 @@ class Groups(Model):
     comm = relationship("Comms", back_populates="comm_group")
     tags = relationship("Tags", secondary='group_tag_association', back_populates="groups")
     tools = relationship("Tools", secondary='group_tool_association', back_populates="groups")
+
     def __repr__(self):
         return self.name
 
-class Victims(Model):
+    def nice_tags(self):
+        tags = []
+        # Render nice html pills
+        html = ""
+        # Get all tag name for communication channel
+        for tag in self.tags:
+            tags.append(tag.tname)
+        # Render nice html pills
+        for tag in tags:
+            html += f'<span class="label label-primary">{tag}</span> '
+        return Esc(html)
+
+
+class  Victims(Model):
     # DDosIA
     __tablename__ = 'victim'
     id = Column(Integer, primary_key=True, autoincrement=True)
