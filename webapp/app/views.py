@@ -199,7 +199,8 @@ class MediasView(ModelView):
             media = db.session.query(Medias).filter(Medias.mname == media_type).first()
             if not media:
                 return jsonify({'error': 'Not added, Uknow type'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
-            new_comm = Comms(link=uri, eyetelex=False, media=media )  # Create new record
+            new_tag = db.session.query(Tags).filter(Tags.tname == "New").first() # Recupere pour tagger les "New"
+            new_comm = Comms(link=uri, eyetelex=False, media=media, tags=[new_tag] )  # Create new record
             db.session.add(new_comm)
             try:
                 # save l'objet

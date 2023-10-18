@@ -88,20 +88,22 @@ class Comms(Model):
 
     def alltags(self):
         tags = []
+        # Render nice html pills
+        html = "<h6>"
         # Get all tag name for attached groups
         if self.comm_group:
             for tag in self.comm_group.tags:
                 tags.append(tag.tname)
+        for tag in tags:
+            html += f'<span class="label label-default">{tag}</span> '
+        tags = []
         # Get all tag name for communication channel
         for tag in self.tags:
             tags.append(tag.tname)
-
         # Render nice html pills
-        html = "<h6>"
         for tag in tags:
-            html += f'<span class="badge badge-secondary">{tag}</span> '
+            html += f'<span class="label label-primary">{tag}</span> '
         return Esc(html + "</h6>")
-
 
 class Groups(Model):
     # Group itself
