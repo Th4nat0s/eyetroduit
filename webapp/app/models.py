@@ -86,6 +86,22 @@ class Comms(Model):
     def __repr__(self):
         return self.link
 
+    def alltags(self):
+        tags = []
+        # Get all tag name for attached groups
+        if self.comm_group:
+            for tag in self.comm_group.tags:
+                tags.append(tag.tname)
+        # Get all tag name for communication channel
+        for tag in self.tags:
+            tags.append(tag.tname)
+
+        # Render nice html pills
+        html = "<h6>"
+        for tag in tags:
+            html += f'<span class="badge badge-secondary">{tag}</span> '
+        return Esc(html + "</h6>")
+
 
 class Groups(Model):
     # Group itself

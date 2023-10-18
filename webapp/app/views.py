@@ -24,7 +24,7 @@ def valid_time_format(string):
         return False
 
 
-
+# DDOSIA affichage des dernieres cibles
 class VictimsView(ModelView):
     datamodel = SQLAInterface(Victims)
     list_columns = ['timestamp', 'host', 'country', 'Filename']
@@ -98,6 +98,10 @@ class ApiKeysView(ModelView):
 class ToolsView(ModelView):
     datamodel = SQLAInterface(Tools)
     list_columns = ['toolname','groups']
+
+
+
+# Affichage des type de media (twitter , telegram etc )
 class MediasView(ModelView):
     datamodel = SQLAInterface(Medias)
     list_columns = ['mname','comm']
@@ -216,10 +220,11 @@ class TagsView(ModelView):
     label_columns = {'tname': 'Tags', 'group': 'Groups name'}
     base_order = ('tname', 'asc()')
 
+# Affichage des liens 
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
-    list_columns = ['comm_group','tags','last_seen','link', 'media', 'eyetelex']
-    label_columns = {'comm_group': 'Groups Name', 'link': 'Links'}
+    list_columns = ['comm_group','alltags', 'last_seen','link', 'media', 'eyetelex']
+    label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags'}
     base_order = ('comm_group.name', 'asc()')
 class GroupsView(ModelView):
     label_columns = {'name': 'Groups Name', 'comm': 'Links'}
