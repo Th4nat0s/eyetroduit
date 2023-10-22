@@ -6,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from flask_appbuilder.models.decorators import renders
+# from flask_appbuilder.models.filters import CustomFilter
 
 def dbversion():
     return DBVERSION
@@ -70,6 +71,25 @@ class CommTagAssociation(Model):
     comm_id = Column(Integer, ForeignKey('comms.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
+
+class Hashts(Model):
+    # Hash Tags
+    id = Column(Integer, primary_key=True)
+    name =  Column(String(150), unique = True, nullable=False)
+    count = Column(Integer, default = 0)
+    first_seen = Column(DateTime, default=func.now())
+    last_seen = Column(DateTime, default=func.now())
+    comms = relationship("Comms", secondary='hasht_comm_association', back_populates="hashts")
+
+    def __repr__(self):
+        return self.name
+
+
+class HashtcommAssociation(Model):
+    __tablename__ = 'hasht_comm_association'
+    hasht_id = Column(Integer, ForeignKey('hashts.id'), primary_key=True)
+    comm_id = Column(Integer, ForeignKey('comms.id'), primary_key=True)
+
 class Comms(Model):
     # Communication for a group (twitter/telegram etc.. with link
     id = Column(Integer, primary_key=True)
@@ -78,10 +98,12 @@ class Comms(Model):
     comm_group= relationship("Groups", back_populates="comm")
     media_id = Column(Integer, ForeignKey('medias.id'))
     media = relationship("Medias", back_populates="comm")
-    eyetelex = Column(Boolean, default=True)
+    eyetelex = Column(Boolean, default=False)
     first_seen = Column(DateTime, default=func.now())
     last_seen = Column(DateTime, default=func.now())
     tags = relationship("Tags", secondary='comm_tag_association', back_populates="comms")
+    hashts = relationship("Hashts", secondary='hasht_comm_association', back_populates="comms")
+
 
     def __repr__(self):
         return self.link
@@ -162,12 +184,36 @@ class  Victims(Model):
     def __repr__(self):
         return self.id
 
+
+
+'''
+    Victims Detected by checkhost report
+'''
+'''
+class DDosVictims(Model):
+    __tablename__ = 'ddosvictims'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host = Column(String)
+    domain = Column(String)
+    timestamp = Column(DateTime, default=func.now())
+    country = Column(String)
+    endpoint = Column(String)
+    ip = Column(String)
+    lat = Column(String)
+    lon = Column(String)
+    checkhost = Column(String)  # Doit t'il etre unique ??
+    #ddosv_comm_id = Column(Integer, ForeignKey('comms.id'))
+    # ddosv_comm= relationship("Coms", back_populates="comm")
+'''
+
 class Configs(Model):
     # Collected configs
     __tablename__ = 'config'
     id = Column(Integer, primary_key=True, autoincrement=True)
     md5 = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+
 
 if __name__ == "__main__":
     print (DBVERSION)

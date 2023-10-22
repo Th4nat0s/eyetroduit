@@ -4,10 +4,15 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi, BaseView, has_access
 from flask_appbuilder.api import expose
 from flask_appbuilder.models.decorators import renders
-from sqlalchemy.exc import IntegrityError 
+from sqlalchemy.exc import IntegrityError
+
+
+from flask_appbuilder.models.filters import BaseFilter
+# from flask_appbuilder.widgets import Select2Widget
+
 
 from . import appbuilder, db
-from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys
+from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys, Hashts
 from .lib import adb, getandparse
 
 from flask_appbuilder import IndexView
@@ -106,6 +111,11 @@ class MediasView(ModelView):
     datamodel = SQLAInterface(Medias)
     list_columns = ['mname','comm']
     label_columns = {'mname': 'Media', 'comm': 'Links'}
+
+    # base_filters = [['custom_search', CustomFilter, 'Custom Search']]
+
+
+
 
     # curl -X POST -d "api_key=votre_api_key" https://..../mediasview/api_get_telegram_job
     @expose('/api_get_telegram_job', methods=['POST'])
@@ -207,12 +217,76 @@ class MediasView(ModelView):
                 db.session.commit()
             except IntegrityError as e:
                 # Si pas content, c'est déja existant , on rollbck
-                db.session.rollback()  
+                db.session.rollback()
                 return jsonify({'error': 'Not added, Already present'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
             return jsonify({'sucess': 'source added'}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
         else:
             return jsonify({'error': 'Not added, invalid api key'}), 401  # je dis pas apikey invalid sinon un pentest me fera chier.
 
+class HashtsView(ModelView):
+    datamodel = SQLAInterface(Hashts)
+    list_columns = ['name','count','last_seen','comms']
+    label_columns = {'name': 'HashTag', 'last_seen': 'Last Seen (UTC)', 'comms': 'Links'}
+    base_order = ('last_seen', 'asc()')
+
+    # curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "hashtag": "#free-mandela", "count": 5, "channels": ["Telegram","Truc"]}' http://127.0.0.1:5000/hashtsview/api_upd_hashtag
+    @expose('/api_upd_hashtag', methods=['POST'])
+    def add_media(self):
+        '''
+        Route API pour updater un Hashtag
+            api_key = la clef
+            hashtag = le hashtag
+            count = combien de fois il a été vu
+            channel = les channels ou il a été vu
+
+            # perte de combien de fois par channel il a été vu... a traiter un jour.
+            # la on compte juste la popularité d'un tag, pas ou il est populaire encore.
+
+            name =  Column(String(150), unique = True, nullable=False)
+            count = Column(Integer, default = 0)
+            first_seen = Column(DateTime, default=func.now())
+            last_seen = Column(DateTime, default=func.now())
+            comms = relationship("Comms", secondary='hasht_comm_association', back_populates="hashts")
+
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+
+        # check minima
+        if 'api_key' in data and 'hashtag' in data and 'channels' in data and 'count' in data:
+            key = data['api_key']
+        # check Api KEy
+        auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid and type(data['count']==int):
+            # récupère les channel qu'on cherche.
+            # todo check if channel est une list
+            dbchannels = []
+            for uri in data['channels']:
+                uri = f"https://t.me/{uri}"
+                urlo = db.session.query(Comms).filter(Comms.link==uri).first() # Find the url
+                if urlo:
+                    dbchannels.append(urlo)
+                else:
+                    # arrivé là c'est une URL que je ne connais pas qu'on me reporte... créons là.
+                    pass
+
+            # Add dans la db, le hashtag
+            new_hashtag = Hashts(name=data['hashtag'], count=data['count'], comms=dbchannels )  # Create new record
+            db.session.add(new_hashtag)
+            try:
+                # save l'objet
+                db.session.commit()
+            except IntegrityError as e:
+                # Si pas content, c'est déja existant , on rollbck, et on update l'object exitstant
+                db.session.rollback()
+                exist_hashtag = db.session.query(Hashts).filter(Hashts.name == data['hashtag']).first()
+                exist_hashtag.count += data['count']
+                exist_hashtag.last_seen =  datetime.now().replace(microsecond=0)  # Grande question, doit t'on passer l date dans le jison
+                exist_hashtag.comms += dbchannels  # Le pipe sort unqi est fait magiquement
+                db.session.commit()
+            return jsonify({'success': 'hashtag updated'}), 200 
+        else:
+            return jsonify({'error': 'Not changes, invalid api key'}), 401
 
 
 class TagsView(ModelView):
@@ -227,6 +301,7 @@ class CommsView(ModelView):
     list_columns = ['comm_group','alltags', 'last_seen','link', 'media', 'nice_eyetelex']
     label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags', 'nice_eyetelex': 'Fetch'}
     base_order = ('comm_group.name', 'asc()')
+    list_template = 'list_comm.html'
 
 class GroupsView(ModelView):
     label_columns = {'name': 'Groups Name', 'comm': 'Links', 'nice_tags': 'Tags'}
@@ -265,6 +340,7 @@ appbuilder.add_view( TagsView, "Tags Management", icon="fa-folder-open-o", categ
 appbuilder.add_view( MediasView, "Comm Source", icon="fa-folder-open-o", category="Config"    )
 appbuilder.add_view( GroupsView, "Groups Management", icon="fa-folder-open-o", category="Groups"    )
 appbuilder.add_view( CommsView, "Communication Sources", icon="fa-folder-open-o", category="Groups"    )
+appbuilder.add_view( HashtsView, "HashTags", icon="fa-folder-open-o", category="Groups"    )
 appbuilder.add_view( VictimsView, "Victims", icon="fa-folder-open-o", category="DDoSia"    )
 appbuilder.add_view( ConfigsView, "Configs", icon="fa-folder-open-o", category="DDoSia"    )
 
