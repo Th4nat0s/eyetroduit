@@ -6,7 +6,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from flask_appbuilder.models.decorators import renders
-# from flask_appbuilder.models.filters import CustomFilter
+from .lib import util
+from . import db
 
 def dbversion():
     return DBVERSION
@@ -84,6 +85,14 @@ class Hashts(Model):
     def __repr__(self):
         return self.name
 
+    def repr_links(self):
+        html = ""
+        for comm in self.comms:
+            tag = util.lnk2tel(comm.link)
+            id = comm.id
+            uri = url_for("CommsView.show", pk=comm.id)
+            html += f'<a href="{uri}"><span class="label label-default">{tag}</span></a> '
+        return Esc(html)
 
 class HashtcommAssociation(Model):
     __tablename__ = 'hasht_comm_association'
@@ -160,6 +169,26 @@ class Groups(Model):
         for tag in tags:
             html += f'<span class="label label-primary">{tag}</span> '
         return Esc(html)
+
+
+    def nice_comms(self):
+        html = ""
+        media = db.session.query(Medias).filter(Medias.mname == "Telegram").first()
+        for comm in self.comm:
+            if comm.media == media:
+                tag = util.lnk2tel(comm.link)
+                label = "success"
+            else:
+                tag = comm.link
+                label = "default"
+            id = comm.id
+            uri = url_for("CommsView.show", pk=comm.id)
+            html += f'<a href="{uri}"><span class="label label-{label}">{tag}</span></a> '
+        return Esc(html)
+
+
+
+
 
 
 class  Victims(Model):

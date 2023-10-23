@@ -1,14 +1,10 @@
 from flask import render_template, jsonify, request, Response
-# from flask import Flask, jsonify, render_template, request, send_file
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi, BaseView, has_access
 from flask_appbuilder.api import expose
 from flask_appbuilder.models.decorators import renders
 from sqlalchemy.exc import IntegrityError
-
-
 from flask_appbuilder.models.filters import BaseFilter
-# from flask_appbuilder.widgets import Select2Widget
 
 
 from . import appbuilder, db
@@ -138,9 +134,11 @@ class MediasView(ModelView):
 
             # Split sur le last / pour faire plaisir à dave
             for link in links:
-                index = link[0].rstrip('/').rfind('/')  # vire le last / et trouve le / d'après.
-                nom = link[0][index + 1:]
+                # index = util.lnk2tel(link[0]) # Get short name
+                # nom = link[0][index + 1:]
                 # olinks.append(link[0]) # For debug add all path
+
+                nom = util.lnk2tel(link[0]) # Get short name
                 olinks.append(nom)
             return jsonify({'job': olinks}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
         return jsonify({'job': []}), 401
@@ -225,8 +223,8 @@ class MediasView(ModelView):
 
 class HashtsView(ModelView):
     datamodel = SQLAInterface(Hashts)
-    list_columns = ['name','count','last_seen','comms']
-    label_columns = {'name': 'HashTag', 'last_seen': 'Last Seen (UTC)', 'comms': 'Links'}
+    list_columns = ['name','count','last_seen','repr_links']
+    label_columns = {'name': 'HashTag', 'last_seen': 'Last Seen (UTC)', 'repr_links': 'Links'}
     base_order = ('last_seen', 'asc()')
 
     # curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "hashtag": "#free-mandela", "count": 5, "channels": ["Telegram","Truc"]}' http://127.0.0.1:5000/hashtsview/api_upd_hashtag
@@ -304,8 +302,8 @@ class CommsView(ModelView):
     list_template = 'list_comm.html'
 
 class GroupsView(ModelView):
-    label_columns = {'name': 'Groups Name', 'comm': 'Links', 'nice_tags': 'Tags'}
-    list_columns = ['name','nice_tags', 'comm']
+    label_columns = {'name': 'Groups Name', 'nice_comms': 'Links', 'nice_tags': 'Tags'}
+    list_columns = ['name','nice_tags', 'nice_comms']
     base_order = ('name', 'asc()')
     datamodel = SQLAInterface(Groups)
 
