@@ -8,8 +8,9 @@ from flask_appbuilder.models.filters import BaseFilter
 
 
 from . import appbuilder, db
+from .models import CheckhostVictims
 from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys, Hashts
-from .lib import adb, getandparse
+from .lib import adb, getandparse, util
 
 from flask_appbuilder import IndexView
 import os
@@ -134,10 +135,6 @@ class MediasView(ModelView):
 
             # Split sur le last / pour faire plaisir à dave
             for link in links:
-                # index = util.lnk2tel(link[0]) # Get short name
-                # nom = link[0][index + 1:]
-                # olinks.append(link[0]) # For debug add all path
-
                 nom = util.lnk2tel(link[0]) # Get short name
                 olinks.append(nom)
             return jsonify({'job': olinks}), 200  # je dis pas apikey invalid sinon un pentest me fera chier.
@@ -307,6 +304,13 @@ class GroupsView(ModelView):
     base_order = ('name', 'asc()')
     datamodel = SQLAInterface(Groups)
 
+class CheckhostVictimsView(ModelView):
+    label_columns = {'chekhost': 'Ddos check ID', 'checkhostvictim_comm': 'Links'}
+    list_columns = ['timestamp','checkhost', 'host','checkhostvictim_comm' ]
+    base_order = ('checkhost', 'asc()')
+    datamodel = SQLAInterface(CheckhostVictims)
+
+
 class api(BaseView):
     @expose('/push', methods=['POST'])
     def push(self):
@@ -339,8 +343,9 @@ appbuilder.add_view( MediasView, "Comm Source", icon="fa-folder-open-o", categor
 appbuilder.add_view( GroupsView, "Groups Management", icon="fa-folder-open-o", category="Groups"    )
 appbuilder.add_view( CommsView, "Communication Sources", icon="fa-folder-open-o", category="Groups"    )
 appbuilder.add_view( HashtsView, "HashTags", icon="fa-folder-open-o", category="Groups"    )
-appbuilder.add_view( VictimsView, "Victims", icon="fa-folder-open-o", category="DDoSia"    )
-appbuilder.add_view( ConfigsView, "Configs", icon="fa-folder-open-o", category="DDoSia"    )
+appbuilder.add_view( VictimsView, "DDosia Victims", icon="fa-folder-open-o", category="DDoS"    )
+appbuilder.add_view( ConfigsView, "DDosia Configs", icon="fa-folder-open-o", category="DDoS"    )
+appbuilder.add_view( CheckhostVictimsView, "Telegram reports", icon="fa-folder-open-o", category="DDoS"    )
 
 # Active les liens d'export sans faire de menu
 appbuilder.add_view_no_menu(api())

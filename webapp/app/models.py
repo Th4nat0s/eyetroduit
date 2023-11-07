@@ -103,6 +103,7 @@ class Comms(Model):
     # Communication for a group (twitter/telegram etc.. with link
     id = Column(Integer, primary_key=True)
     link =  Column(String(4096), unique= True, nullable=False )
+
     comm_group_id = Column(Integer, ForeignKey('groups.id'))
     comm_group= relationship("Groups", back_populates="comm")
     media_id = Column(Integer, ForeignKey('medias.id'))
@@ -112,7 +113,7 @@ class Comms(Model):
     last_seen = Column(DateTime, default=func.now())
     tags = relationship("Tags", secondary='comm_tag_association', back_populates="comms")
     hashts = relationship("Hashts", secondary='hasht_comm_association', back_populates="comms")
-
+    checkhostvictim = relationship("CheckhostVictims", back_populates="checkhostvictim_comm")
 
     def __repr__(self):
         return self.link
@@ -217,23 +218,27 @@ class  Victims(Model):
 
 '''
     Victims Detected by checkhost report
+    c'est une table de type "log".. simple listing
 '''
-'''
-class DDosVictims(Model):
-    __tablename__ = 'ddosvictims'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    host = Column(String)
-    domain = Column(String)
-    timestamp = Column(DateTime, default=func.now())
+class CheckhostVictims(Model):
+    __tablename__ = 'checkhostvictims'
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=func.now())  # Timestpam
+    checkhost = Column(String)  # Doit t'il etre unique ??  ID checkhost
+    host = Column(String)  # hostname
+    domain = Column(String) # Domain pété
     country = Column(String)
-    endpoint = Column(String)
     ip = Column(String)
     lat = Column(String)
     lon = Column(String)
-    checkhost = Column(String)  # Doit t'il etre unique ??
-    #ddosv_comm_id = Column(Integer, ForeignKey('comms.id'))
-    # ddosv_comm= relationship("Coms", back_populates="comm")
-'''
+    status = Column(Integer, default=0)  # 0 est reporté, 1 enrichit
+    checkhostvictim_comm_id = Column(Integer, ForeignKey('comms.id'))
+    checkhostvictim_comm = relationship("Comms", back_populates="checkhostvictim")
+
+    def __repr__(self):
+        return self.checkhost
+
+
 
 class Configs(Model):
     # Collected configs
