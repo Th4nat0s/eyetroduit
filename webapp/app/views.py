@@ -5,6 +5,7 @@ from flask_appbuilder.api import expose
 from flask_appbuilder.models.decorators import renders
 from sqlalchemy.exc import IntegrityError
 from flask_appbuilder.models.filters import BaseFilter
+from flask_appbuilder.actions import action
 
 
 from . import appbuilder, db
@@ -112,6 +113,11 @@ class MediasView(ModelView):
     # base_filters = [['custom_search', CustomFilter, 'Custom Search']]
 
 
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket", single=False)
+    def muldelete(self, items):
+        self.datamodel.delete_all(items)
+        self.update_redirect()
+        return redirect(self.get_redirect())
 
 
     # curl -X POST -d "api_key=votre_api_key" https://..../mediasview/api_get_telegram_job
@@ -297,6 +303,13 @@ class CommsView(ModelView):
     label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags', 'nice_eyetelex': 'Fetch'}
     base_order = ('comm_group.name', 'asc()')
     list_template = 'list_comm.html'
+
+
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket", single=False)
+    def muldelete(self, items):
+        self.datamodel.delete_all(items)
+        self.update_redirect()
+        return redirect(self.get_redirect())
 
 class GroupsView(ModelView):
     label_columns = {'name': 'Groups Name', 'nice_comms': 'Links', 'nice_tags': 'Tags'}
