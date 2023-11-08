@@ -231,6 +231,14 @@ class HashtsView(ModelView):
     list_columns = ['name','count','last_seen','repr_links']
     label_columns = {'name': 'HashTag', 'last_seen': 'Last Seen (UTC)', 'repr_links': 'Links'}
     base_order = ('last_seen', 'asc()')
+    list_title = "List HashTags"
+    show_title = "View HashTag"
+    edit_title = "Edit HastTag"
+    add_title = "Add HashTag"
+
+    list_template = 'list_hasht.html'
+
+
 
     # curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "hashtag": "#free-mandela", "count": 5, "channels": ["Telegram","Truc"]}' http://127.0.0.1:5000/hashtsview/api_upd_hashtag
     @expose('/api_upd_hashtag', methods=['POST'])
@@ -297,8 +305,9 @@ class TagsView(ModelView):
     list_columns = ['tname','groups']
     label_columns = {'tname': 'Tags', 'group': 'Groups name'}
     base_order = ('tname', 'asc()')
+    label = 'Hash Tags seen in Channels (Daily Updated)'
 
-# Affichage des liens 
+# Affichage des liens (telegra etc... )
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
     list_columns = ['comm_group','alltags', 'last_seen','link', 'media', 'nice_eyetelex']
@@ -306,6 +315,10 @@ class CommsView(ModelView):
     base_order = ('comm_group.name', 'asc()')
     list_template = 'list_comm.html'
 
+    list_title = "List Links"
+    show_title = "View Link"
+    edit_title = "Edit Link"
+    add_title = "Add Link"
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket", single=False)
     def muldelete(self, items):
@@ -354,9 +367,9 @@ class api(BaseView):
 appbuilder.add_view( ApiKeysView, "Api Key Management", icon="fa-folder-open-o", category="Config"    )
 appbuilder.add_view( ToolsView, "Tools Management", icon="fa-folder-open-o", category="Config"    )
 appbuilder.add_view( TagsView, "Tags Management", icon="fa-folder-open-o", category="Config"    )
-appbuilder.add_view( MediasView, "Comm Source", icon="fa-folder-open-o", category="Config"    )
+appbuilder.add_view( MediasView, "Comm. Source", icon="fa-folder-open-o", category="Config"    )
 appbuilder.add_view( GroupsView, "Groups Management", icon="fa-folder-open-o", category="Groups"    )
-appbuilder.add_view( CommsView, "Communication Sources", icon="fa-folder-open-o", category="Groups"    )
+appbuilder.add_view( CommsView, "Comm. Links", icon="fa-folder-open-o", category="Groups" )
 appbuilder.add_view( HashtsView, "HashTags", icon="fa-folder-open-o", category="Groups"    )
 appbuilder.add_view( VictimsView, "DDosia Victims", icon="fa-folder-open-o", category="DDoS"    )
 appbuilder.add_view( ConfigsView, "DDosia Configs", icon="fa-folder-open-o", category="DDoS"    )

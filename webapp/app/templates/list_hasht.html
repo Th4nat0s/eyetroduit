@@ -1,0 +1,7 @@
+{% extends "appbuilder/general/model/list.html" %}
+
+    {% block list_search scoped %}
+        {{ super() }}
+       The a tag counter increments once per day for each channel where tag is found in, regardless of the number of tags found within that channel on a given day.
+      <br><br>
+    {% endblock %}
