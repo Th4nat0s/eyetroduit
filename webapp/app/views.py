@@ -14,6 +14,7 @@ from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKey
 from .lib import adb, getandparse, util
 
 from flask_appbuilder import IndexView
+import re
 import os
 import json
 from datetime import datetime
@@ -337,6 +338,63 @@ class CheckhostVictimsView(ModelView):
     list_columns = ['timestamp','checkhost', 'host','checkhostvictim_comm' ]
     base_order = ('checkhost', 'asc()')
     datamodel = SQLAInterface(CheckhostVictims)
+
+
+    '''
+    $ curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "channel": "Indian_Cyber_Force_Official" ,"checkhost": "https://check-host.net/check-report/idcheckhosturl", "datetime": "2023-10-11 16:07:34"}'     http://127.0.0.1:5000/checkhostvictimsview/api_checkhost_victim
+
+    Format de temps YYYY-MM-DD HH:MM.SS
+    Format des noms de channel telegram "court"
+    '''
+    @expose('/api_checkhost_victim', methods=['POST'])
+    def api_time_media(self):
+        '''
+        Route API pour ajouter un nouveau lien dans la db automagiquement.
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+        auth_valid = None
+
+        # check minima
+        if 'api_key' in data and 'channel' in data and 'datetime' in data and 'checkhost' in data:
+            key = data['api_key']
+            # check Api KEy
+            auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            checkhost = data['checkhost']
+            uri = data['channel']
+            date = data['datetime']
+
+
+            # Retrouvons le channel de comm dont on parle
+            uri = f"https://t.me/{uri}"
+            urlo = db.session.query(Comms).filter(Comms.link==uri).first() # Find the url
+            if not urlo:
+                return jsonify({'error': 'media not found'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+
+            # Check le format de time "2023-10-11 16:07:34"
+            if not valid_time_format(date):
+                return jsonify({'error': 'datetime invalid'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+
+            # check du format de "checkhost"
+            pattern = re.compile(r'^https:\/\/check-host\.net\/check-report\/.*$')
+            if not pattern.match(checkhost):
+                return jsonify({'error': 'Invalid CheckHost url'}), 400
+
+            # Arrivé ici c'est bon, ajout du DDOS record
+            date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            new_ddos = CheckhostVictims(timestamp=date, checkhost=checkhost, checkhostvictim_comm=urlo)  # Create new record
+            db.session.add(new_ddos)
+            try:
+                # save l'objet
+                db.session.commit()
+            except IntegrityError as e:
+                # Si pas content, c'est déja existant , on rollbck, et on update l'object exitstant
+                db.session.rollback()
+                return jsonify({'success': 'Error registering DDOS'}), 200
+            return jsonify({'success': 'DDOS report updated'}), 200 
+        else:
+            return jsonify({'error': 'No changes, invalid api key'}), 401
 
 
 class api(BaseView):

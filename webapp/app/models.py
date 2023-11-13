@@ -188,10 +188,6 @@ class Groups(Model):
         return Esc(html)
 
 
-
-
-
-
 class  Victims(Model):
     # DDosIA
     __tablename__ = 'victim'
