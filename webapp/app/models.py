@@ -131,8 +131,8 @@ class Comms(Model):
         if self.link.startswith('https://t.me/'):
             chan = self.link.split('/')[3]
             html = '<i class="fa-brands fa-telegram fa-sm"></i>&nbsp;'
-            html += f'<a href="https:/web.telegram.org/k/#@{chan}" target="_blank" rel="noopener'
-            html += f'noreferrer">{chan}</a>&nbsp;'
+            html += f'<a href="https://web.telegram.org/k/#@{chan}" target="_blank" rel="noopener'
+            html += f' noreferrer">{chan}</a>&nbsp;'
             html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
             html += 'onclick="copyToClipboard('
             html += f"'{self.link}')"
@@ -141,8 +141,8 @@ class Comms(Model):
         elif self.link.startswith('https://twitter.com/'):
             chan = self.link.split('/')[3]
             html = '<i class="fa-brands fa-twitter fa-sm"></i>&nbsp;'
-            html += f'<a href="https:/twitter.com{chan}" target="_blank" rel="noopener'
-            html += f'noreferrer">{chan}</a>&nbsp;'
+            html += f'<a href="https://twitter.com{chan}" target="_blank" rel="noopener'
+            html += f' noreferrer">{chan}</a>&nbsp;'
             html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
             html += 'onclick="copyToClipboard('
             html += f"'{self.link}')"
@@ -151,7 +151,7 @@ class Comms(Model):
         else:
             html = '<i class="fa-solid fa-globe fa-sm"></i>&nbsp;'
             html += f'<a href="{self.link}" target="_blank" rel="noopener'
-            html += f'noreferrer">{self.link}</a>&nbsp;'
+            html += f' noreferrer">{self.link}</a>&nbsp;'
             html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
             html += 'onclick="copyToClipboard('
             html += f"'{self.link}')"
