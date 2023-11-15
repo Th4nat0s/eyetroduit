@@ -29,6 +29,12 @@ function copyToClipboard(text) {
     }
 }
 
+
+function openLinkInExistingTab(link) {
+       window.open(link, 'Telegram Web'); // Utilisez le même nom de fenêtre que le site B
+}
+
+
 function switchmodal(idmodal, textmodal){
   image = document.getElementById('view_modal_img');
   image.src = "/screen/" + idmodal;

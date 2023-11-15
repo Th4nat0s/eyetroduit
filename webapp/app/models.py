@@ -130,9 +130,10 @@ class Comms(Model):
     def nice_link(self):
         if self.link.startswith('https://t.me/'):
             chan = self.link.split('/')[3]
-            html = '<i class="fa-brands fa-telegram fa-sm"></i>&nbsp;'
-            html += f'<a href="https://web.telegram.org/k/#@{chan}" target="_blank" rel="noopener'
-            html += f' noreferrer">{chan}</a>&nbsp;'
+            html = '<i class="fa-brands fa-telegram "></i>&nbsp;'
+            html += '<a href="javascript:void(0);" onclick="openLinkInExistingTab('
+            html += f"'https://web.telegram.org/k/#@{chan}')"
+            html += f'">{chan}</a>&nbsp;'
             html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
             html += 'onclick="copyToClipboard('
             html += f"'{self.link}')"
@@ -140,7 +141,7 @@ class Comms(Model):
             return Esc(html)
         elif self.link.startswith('https://twitter.com/'):
             chan = self.link.split('/')[3]
-            html = '<i class="fa-brands fa-twitter fa-sm"></i>&nbsp;'
+            html = '<i class="fa-brands fa-twitter "></i>&nbsp;'
             html += f'<a href="https://twitter.com{chan}" target="_blank" rel="noopener'
             html += f' noreferrer">{chan}</a>&nbsp;'
             html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
@@ -149,7 +150,7 @@ class Comms(Model):
             html += '"><i class="fa-regular fa-copy"></i></a>&nbsp;'
             return Esc(html)
         else:
-            html = '<i class="fa-solid fa-globe fa-sm"></i>&nbsp;'
+            html = '<i class="fa-solid fa-globe "></i>&nbsp;'
             html += f'<a href="{self.link}" target="_blank" rel="noopener'
             html += f' noreferrer">{self.link}</a>&nbsp;'
             html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
