@@ -134,7 +134,7 @@ class Comms(Model):
             html += '<a href="javascript:void(0);" onclick="openLinkInExistingTab('
             html += f"'https://web.telegram.org/k/#@{chan}')"
             html += f'">{chan}</a>&nbsp;'
-            html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
+            html += '<a href="javascript:void(0);" data-toggle="tooltip" title="Copy link" rel="tooltip" '
             html += 'onclick="copyToClipboard('
             html += f"'{self.link}')"
             html += '"><i class="fa-regular fa-copy"></i></a>&nbsp;'

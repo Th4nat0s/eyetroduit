@@ -8,8 +8,8 @@
 function copyToClipboard(text) {
     if (window.clipboardData && window.clipboardData.setData) {
         // IE specific code path to prevent textarea being shown while dialog is visible.
-        return clipboardData.setData("Text", text); 
-
+        clipboardData.setData("Text", text);
+        showAlert();
     } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
         var textarea = document.createElement("textarea");
         textarea.textContent = text;
@@ -17,16 +17,35 @@ function copyToClipboard(text) {
         document.body.appendChild(textarea);
         textarea.select();
         try {
-            return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+            document.execCommand("copy");  // Security exception may be thrown by some browsers.
+            showAlert();
         } catch (ex) {
             console.warn("Copy to clipboard failed.", ex);
-            return false;
         } finally {
-
-            window.alert("Url Copied");
-            document.body.removeChild(textarea);
+            setTimeout(function() {
+                document.body.removeChild(textarea);
+            }, 1000); // 1000 milliseconds (1 second) delay
         }
     }
+}
+
+
+function showAlert() {
+    var alertDiv = document.createElement("div");
+    alertDiv.textContent = "Url Copied";
+    alertDiv.style.position = "fixed";
+    alertDiv.style.top = "50%";
+    alertDiv.style.left = "50%";
+    alertDiv.style.transform = "translate(-50%, -50%)";
+    alertDiv.style.padding = "10px";
+    alertDiv.style.background = "#4CAF50";
+    alertDiv.style.color = "white";
+    alertDiv.style.borderRadius = "5px";
+    document.body.appendChild(alertDiv);
+
+    setTimeout(function() {
+        document.body.removeChild(alertDiv);
+    }, 1000); // 1000 milliseconds (1 second) delay
 }
 
 
