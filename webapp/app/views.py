@@ -106,22 +106,11 @@ class ToolsView(ModelView):
 
 
 # Affichage des type de media (twitter , telegram etc )
+# Panneau de configuration 
 class MediasView(ModelView):
     datamodel = SQLAInterface(Medias)
     list_columns = ['mname','comm']
     label_columns = {'mname': 'Media', 'comm': 'Links'}
-
-    # base_filters = [['custom_search', CustomFilter, 'Custom Search']]
-
-    # action to allow pick and delete in the list
-    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket", single=False)
-    def muldelete(self, items):
-        if isinstance(items, list):
-            self.datamodel.delete_all(items)
-            self.update_redirect()
-        else:
-            self.datamodel.delete(items)
-        return redirect(self.get_redirect())
 
     # curl -X POST -d "api_key=votre_api_key" https://..../mediasview/api_get_telegram_job
     @expose('/api_get_telegram_job', methods=['POST'])
@@ -308,11 +297,12 @@ class TagsView(ModelView):
     base_order = ('tname', 'asc()')
     label = 'Hash Tags seen in Channels (Daily Updated)'
 
-# Affichage des liens (telegra etc... )
+# Affichage des URL (telegram etc... )
+# Listing des URL Collectées et suivies
 class CommsView(ModelView):
     datamodel = SQLAInterface(Comms)
-    list_columns = ['comm_group','alltags', 'last_seen','link', 'media', 'nice_eyetelex']
-    label_columns = {'comm_group': 'Groups Name', 'link': 'Links', 'alltags': 'Tags', 'nice_eyetelex': 'Fetch'}
+    list_columns = ['comm_group','alltags', 'last_seen','nice_link', 'media', 'nice_eyetelex']
+    label_columns = {'comm_group': 'Groups Name', 'nice_link': 'Links', 'alltags': 'Tags', 'nice_eyetelex': 'Fetch'}
     base_order = ('comm_group.name', 'asc()')
     list_template = 'list_comm.html'
 
@@ -321,11 +311,16 @@ class CommsView(ModelView):
     edit_title = "Edit Link"
     add_title = "Add Link"
 
-    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket", single=False)
+    # action to allow pick and delete in the list
+    @action("muldelete", "&nbsp;Delete", "Delete selection ?", "fa-trash-alt", single=True)
     def muldelete(self, items):
-        self.datamodel.delete_all(items)
-        self.update_redirect()
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
         return redirect(self.get_redirect())
+
 
 class GroupsView(ModelView):
     label_columns = {'name': 'Groups Name', 'nice_comms': 'Links', 'nice_tags': 'Tags'}

@@ -1,6 +1,33 @@
-{% extends "appbuilder/general/model/list.html" %}
+
+{% extends "appbuilder/base.html" %}
+{% import 'appbuilder/general/lib.html' as lib %}
+
+{% block content %}
+{{ lib.panel_begin(title) }}
 
     {% block list_search scoped %}
-        {{ super() }}
+
        Comming soon here fast tags [Pro-Hamas] [SQLDump] [CredsDumps]<br><br>
-    {% endblock %}
+            {% call lib.accordion_tag("accordion1",_("Search"), False) %}
+                        {{ widgets.get('search')()|safe }}
+                                {% endcall %}
+                                    {% endblock %}
+
+                                        {% block list_list scoped %}
+                                                <div>
+                                                            {{ widgets.get('list')()|safe }}
+                                                                    </div>
+                                                                        {% endblock %}
+
+                                                                        {{ lib.panel_end() }}
+                                                                        {% endblock %}
+
+
+
+{% block messages %}
+{% endblock %}
+
+{% block tail_js %}
+    {{ super() }}
+        <script src="{{url_for('static',filename='js/additionnal.js')}}"></script>
+   {% endblock %}

@@ -125,6 +125,39 @@ class Comms(Model):
         else:
             return Esc('<i class="fa fa-square-o"></i>')
 
+    ''' render nickely telegram links '''
+    @renders('link')
+    def nice_link(self):
+        if self.link.startswith('https://t.me/'):
+            chan = self.link.split('/')[3]
+            html = '<i class="fa-brands fa-telegram fa-sm"></i>&nbsp;'
+            html += f'<a href="https:/web.telegram.org/k/#@{chan}" target="_blank" rel="noopener'
+            html += f'noreferrer">{chan}</a>&nbsp;'
+            html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
+            html += 'onclick="copyToClipboard('
+            html += f"'{self.link}')"
+            html += '"><i class="fa-regular fa-copy"></i></a>&nbsp;'
+            return Esc(html)
+        elif self.link.startswith('https://twitter.com/'):
+            chan = self.link.split('/')[3]
+            html = '<i class="fa-brands fa-twitter fa-sm"></i>&nbsp;'
+            html += f'<a href="https:/twitter.com{chan}" target="_blank" rel="noopener'
+            html += f'noreferrer">{chan}</a>&nbsp;'
+            html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
+            html += 'onclick="copyToClipboard('
+            html += f"'{self.link}')"
+            html += '"><i class="fa-regular fa-copy"></i></a>&nbsp;'
+            return Esc(html)
+        else:
+            html = '<i class="fa-solid fa-globe fa-sm"></i>&nbsp;'
+            html += f'<a href="{self.link}" target="_blank" rel="noopener'
+            html += f'noreferrer">{self.link}</a>&nbsp;'
+            html += '<a href="#" data-toggle="tooltip" title="Copy link" rel="tooltip" '
+            html += 'onclick="copyToClipboard('
+            html += f"'{self.link}')"
+            html += '"><i class="fa-regular fa-copy"></i></a>&nbsp;'
+            return Esc(html)
+
 
     def alltags(self):
         tags = []
