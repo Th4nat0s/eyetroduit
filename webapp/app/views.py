@@ -376,8 +376,16 @@ class CheckhostVictimsView(ModelView):
             if not pattern.match(checkhost):
                 return jsonify({'error': 'Invalid CheckHost url'}), 400
 
-            # Arrivé ici c'est bon, ajout du DDOS record
+            # Arrivé ici, est-ce que ce record est déja enregistré
+            # Same time, Same chan, Same Checkhost
+
             date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            existing = db.session.query(CheckhostVictims).filter(CheckhostVictims.checkhost == checkhost, CheckhostVictims.timestamp == date, CheckhostVictims.checkhostvictim_comm==urlo).first()
+            print (existing)
+            if existing:
+                return jsonify({'error': 'This event is already reported'}), 400
+
+            # Arrivé ici c'est bon, ajout du DDOS record
             new_ddos = CheckhostVictims(timestamp=date, checkhost=checkhost, checkhostvictim_comm=urlo)  # Create new record
             db.session.add(new_ddos)
             try:
