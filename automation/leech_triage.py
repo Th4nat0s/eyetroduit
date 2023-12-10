@@ -1,4 +1,3 @@
-# Quick ChatGTP POC script to leech Tria.GE Agent Tesla
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -50,6 +49,7 @@ def extract_malware_config(url):
                         'Type': config_type,
                         'Credentials': credentials
                     }
+                
                 # Si aucune entrée spécifique n'est trouvée, retourner la famille uniquement
                 return {
                     'ID': url.split('/')[-1],
@@ -66,27 +66,34 @@ def extract_malware_config(url):
         print(f"La requête a échoué avec le code d'état {response.status_code}")
         return None
 
+# Liste des familles à rechercher
+families = ['snakekeylogger', 'agenttesla']
+
 # URL de la page principale
-main_url = "https://tria.ge/s?q=family%3Aagenttesla"
+main_url_template = "https://tria.ge/s?q=family%3A{}"
 
-# Récupération des valeurs de "data-sample-id" à partir de la page principale
-response = requests.get(main_url)
-if response.status_code == 200:
-    soup = BeautifulSoup(response.text, 'html.parser')
-    samples = soup.find_all('a', class_='row', attrs={'data-sample-id': True})
+# Récupération des informations pour chaque famille
+malware_configs = []
+for family in families:
+    main_url = main_url_template.format(family)
 
-    malware_configs = []
-    for sample in samples:
-        sample_id = sample['data-sample-id']
-        sample_url = f"https://tria.ge/{sample_id}"
+    # Récupération des valeurs de "data-sample-id" à partir de la page principale
+    response_main = requests.get(main_url)
+    if response_main.status_code == 200:
+        soup_main = BeautifulSoup(response_main.text, 'html.parser')
+        samples = soup_main.find_all('a', class_='row', attrs={'data-sample-id': True})
 
-        # Extraction des informations de la section "Malware Config"
-        malware_config_info = extract_malware_config(sample_url)
+        for sample in samples:
+            sample_id = sample['data-sample-id']
+            sample_url = f"https://tria.ge/{sample_id}"
 
-        if malware_config_info:
-            malware_configs.append(malware_config_info)
+            # Extraction des informations de la section "Malware Config"
+            malware_config_info = extract_malware_config(sample_url)
 
-    # Écriture des informations dans un fichier JSON
-    with open('malware_configs.json', 'w') as json_file:
-        json.dump(malware_configs, json_file, indent=2)
+            if malware_config_info:
+                malware_configs.append(malware_config_info)
+
+# Écriture des informations dans un fichier JSON
+with open('malware_configs.json', 'w') as json_file:
+    json.dump(malware_configs, json_file, indent=2)
 
