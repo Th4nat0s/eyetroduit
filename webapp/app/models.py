@@ -261,7 +261,7 @@ class CheckhostVictims(Model):
     ip = Column(String)
     lat = Column(String)
     lon = Column(String)
-    status = Column(Integer, default=0)  # 0 est reporté, 1 enrichit
+    status = Column(Integer, default=0)  # 0 est reporté, 1 error, 2  enrichit
     checkhostvictim_comm_id = Column(Integer, ForeignKey('comms.id'))
     checkhostvictim_comm = relationship("Comms", back_populates="checkhostvictim")
 

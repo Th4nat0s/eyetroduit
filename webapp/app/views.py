@@ -11,12 +11,13 @@ from flask import redirect
 from . import appbuilder, db
 from .models import CheckhostVictims
 from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys, Hashts
-from .lib import adb, getandparse, util
+from .lib import adb, getandparse, util, checkhost
 
 from flask_appbuilder import IndexView
 import re
 import os
 import json
+import tldextract
 from datetime import datetime
 
 def valid_time_format(string):
@@ -336,15 +337,69 @@ class CheckhostVictimsView(ModelView):
 
 
     '''
+    $ curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "count": 1 }' http://127.0.0.1:5000/checkhostvictimsview/api_process_checkhost_victim
+
+    Api simple, qui traine "N" report de checkhost victim et scrap checkhostvictim pour la resolution
+    Doit etre crontabé quelque part.. pour faire faier le taff a la db
+    '''
+    @expose('/api_process_checkhost_victim', methods=['POST'])
+    def api_process_checkhost_victim(self):
+        '''
+        Route API pour processer les victimes de DDOS la db automagiquement.
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+        auth_valid = None
+
+        # check minima
+        if 'api_key' in data and 'count' in data:
+            key = data['api_key']
+            # check Api KEy
+            auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            count = data['count']
+            count = int(count)  # surement mieux a faire pour s'assurer d'un INT
+            if count > 50: # Hard limit
+                count = 50
+            # Arrivé ici on sais combien on va en traiter.
+            candidates = db.session.query(CheckhostVictims).filter(CheckhostVictims.status == 0).limit(count)
+            if candidates: # parce que ptet y a rien a faire....
+                for candidate in candidates:
+                    try:
+                        host = checkhost.checkhost(candidate.checkhost)
+                        candidate.domain = tldextract.extract(host).domain + "." + tldextract.extract(host).suffix # Get domain info
+                        ips = checkhost.resolveall(host)
+                        candidate.host = host
+                        if ips: # resoud lat long de la première IP qu'on vois.
+                            first_ip = ips[0]
+                            print (first_ip)
+                            geoinfo = getandparse.ip2geo(first_ip)
+                            candidate.country = geoinfo.country.name
+                            candidate.lat = geoinfo.location.latitude
+                            candidate.lon =  geoinfo.location.longitude
+                        candidate.ip = ', '.join(ips)
+                        candidate.status = 2  # Code 2 all good
+                    except:
+                        # Resolution ratée, mais testé on passe en code 1
+                        candidate.status = 1
+                    db.session.commit()
+
+            return jsonify({'success': 'DDOS report updated'}), 200
+        else:
+            return jsonify({'error': 'No changes, invalid api key'}), 401
+
+
+
+    '''
     $ curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "channel": "Indian_Cyber_Force_Official" ,"checkhost": "https://check-host.net/check-report/idcheckhosturl", "datetime": "2023-10-11 16:07:34"}'     http://127.0.0.1:5000/checkhostvictimsview/api_checkhost_victim
 
     Format de temps YYYY-MM-DD HH:MM.SS
     Format des noms de channel telegram "court"
     '''
     @expose('/api_checkhost_victim', methods=['POST'])
-    def api_time_media(self):
+    def api_checkhost_victim(self):
         '''
-        Route API pour ajouter un nouveau lien dans la db automagiquement.
+        Route API pour ajouter un nouveau lien DDOS dans la db automagiquement.
         '''
         # Récupérez le JSON
         data = request.get_json()
