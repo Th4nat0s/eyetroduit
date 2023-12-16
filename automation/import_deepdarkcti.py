@@ -2,6 +2,14 @@ import requests
 import json
 
 # Import les telegram channels "onlines" depuis deep dark cti github ressource
+import yaml
+
+# Charger la configuration depuis le fichier YAML
+with open('config.yaml', 'r') as yaml_file:
+    config = yaml.safe_load(yaml_file)
+
+    # Récupérer la valeur du token depuis la configuration
+    token = config.get('token', 'default_value_if_not_present')
 
 # URL de la page à récupérer
 url = "https://raw.githubusercontent.com/fastfire/deepdarkCTI/main/telegram.md"
@@ -10,8 +18,7 @@ url = "https://raw.githubusercontent.com/fastfire/deepdarkCTI/main/telegram.md"
 post_url = "https://xakep.in/eyetroduit/mediasview/api_add_media"
 
 # Apikey to post
-Apikey = ''
-
+Apikey = token
 
 # Récupérer le contenu de la page
 response = requests.get(url)
