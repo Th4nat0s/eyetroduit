@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 import json
 
@@ -8,7 +9,6 @@ import yaml
 with open('config.yaml', 'r') as yaml_file:
     config = yaml.safe_load(yaml_file)
 
-    # Récupérer la valeur du token depuis la configuration
     token = config.get('token', 'default_value_if_not_present')
 
 # URL de la page à récupérer

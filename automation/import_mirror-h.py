@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Leech les report sur mirror-h via TOR et post en direct
 
 
