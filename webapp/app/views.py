@@ -9,8 +9,8 @@ from flask_appbuilder.actions import action
 from flask import redirect
 
 from . import appbuilder, db
-from .models import CheckhostVictims
 from .models import Groups, Comms, Tags, Medias, Tools, Victims, Configs, ApiKeys, Hashts
+from .models import CheckhostVictims, ClaimedVictims
 from .lib import adb, getandparse, util, checkhost
 
 from flask_appbuilder import IndexView
@@ -329,6 +329,7 @@ class GroupsView(ModelView):
     base_order = ('name', 'asc()')
     datamodel = SQLAInterface(Groups)
 
+
 class CheckhostVictimsView(ModelView):
     label_columns = {'chekhost': 'Ddos check ID', 'checkhostvictim_comm': 'Links'}
     list_columns = ['timestamp','checkhost', 'host','checkhostvictim_comm' ]
@@ -455,6 +456,70 @@ class CheckhostVictimsView(ModelView):
             return jsonify({'error': 'No changes, invalid api key'}), 401
 
 
+# View des rapports de site de reward
+class ClaimedVictimsView(ModelView):
+    label_columns = {'reference': 'Claim Location', 'adversary': 'Adversary'}
+    list_columns = ['timestamp','reference', 'host','adversary']
+    base_order = ('timestamp', 'asc()')
+    datamodel = SQLAInterface(ClaimedVictims)
+
+    '''
+
+    $ curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "adversary": "Tomodashi" ,"target": "https://perdu.com" , "reference": "https://mirror-h.org/zone/5563973/" , "datetime": "2023-10-11 16:07:34", "source": 6}' http://127.0.0.1:5000/claimedvictimsview/api_claimed_victim
+
+    Format de temps YYYY-MM-DD HH:MM.SS
+ 
+    Source is the ID of eyetroduit/mediasview (should be created first)
+    # 5 : Ownzyou
+    # 6 : mirror-h
+
+    '''
+    @expose('/api_claimed_victim', methods=['POST'])
+    def api_claimed_victim(self):
+        '''
+        Route API pour ajouter une nouvelle victime dans la db automagiquement.
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+        auth_valid = None
+
+        # check minima
+        if 'api_key' in data and 'adversary' in data and 'datetime' in data and 'reference' in data and 'target' in data and 'source' in data:
+            key = data['api_key']
+            # check Api KEy
+            auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            # Check le format de time "2023-10-11 16:07:34"
+            if not valid_time_format(data['datetime']):
+                return jsonify({'error': 'datetime invalid'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
+
+            # Arrivé ici, est-ce que ce record est déja enregistré
+            # Same time, Same chan
+            date = datetime.strptime(data['datetime'], "%Y-%m-%d %H:%M:%S")
+            existing = db.session.query(ClaimedVictims).filter(ClaimedVictims.fullurl == data['target'], ClaimedVictims.timestamp == date).first()
+            if existing:
+                return jsonify({'error': 'This event is already reported'}), 400
+
+            # Récupération de la source
+            source = db.session.query(Medias).filter(Medias.id == data['source']).first()
+
+            # Arrivé ici c'est bon, ajout du Claim record
+            new_victim = ClaimedVictims(timestamp=date, media=source, fullurl=data['target'], adversary=data['adversary'], reference=data['reference'] )  # Create new record
+            db.session.add(new_victim)
+            try:
+                # save l'objet
+                db.session.commit()
+            except IntegrityError as e:
+                # Si pas content, c'est déja existant , on rollbck, et on update l'object exitstant
+                db.session.rollback()
+                return jsonify({'success': 'Error registering Victim'}), 200
+            return jsonify({'success': 'Victim report updated'}), 200
+        else:
+            return jsonify({'error': 'No changes, invalid api key'}), 401
+
+
+
+
 class api(BaseView):
     @expose('/push', methods=['POST'])
     def push(self):
@@ -490,6 +555,8 @@ appbuilder.add_view( HashtsView, "HashTags", icon="fa-folder-open-o", category="
 appbuilder.add_view( VictimsView, "DDosia Victims", icon="fa-folder-open-o", category="DDoS"    )
 appbuilder.add_view( ConfigsView, "DDosia Configs", icon="fa-folder-open-o", category="DDoS"    )
 appbuilder.add_view( CheckhostVictimsView, "Telegram reports", icon="fa-folder-open-o", category="DDoS"    )
+appbuilder.add_view( ClaimedVictimsView, "Hacking Claim", icon="fa-folder-open-o", category="Web Monitoring"    )
+
 
 # Active les liens d'export sans faire de menu
 appbuilder.add_view_no_menu(api())

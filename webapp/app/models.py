@@ -25,7 +25,7 @@ class Medias(Model):
     id = Column(Integer, primary_key=True)
     mname =  Column(String(150), unique = True, nullable=False)
     comm = relationship("Comms", back_populates="media")
-
+    claimedvictims = relationship("ClaimedVictims", back_populates="media")
     def __repr__(self):
         return self.mname
 
@@ -265,9 +265,33 @@ class CheckhostVictims(Model):
     checkhostvictim_comm_id = Column(Integer, ForeignKey('comms.id'))
     checkhostvictim_comm = relationship("Comms", back_populates="checkhostvictim")
 
-    def __repr__(self):
-        return self.checkhost
 
+'''
+    Victims claimed by reporting website ( ddos, deface ).
+    c'est une table de type "log".. simple listing
+'''    
+class ClaimedVictims(Model):
+    __tablename__ = 'claimedvictims'
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=func.now())  # TimeStamp
+    fullurl = Column(String) # Reported URL
+    reference = Column(String) # Url du claim que c'est pété
+    host = Column(String)  # hostname
+    domain = Column(String) # Domain pété
+    country = Column(String)
+    ip = Column(String)
+    lat = Column(String)
+    lon = Column(String)
+    adversary = Column(String) # Ref du "hacker"
+    status = Column(Integer, default=0)  # 0 est reporté, 1 error, 2  enrichit
+
+    # Pour savoir d'ou que ca vient. CommSource.
+    media_id = Column(Integer, ForeignKey('medias.id'))
+    media = relationship("Medias", back_populates="claimedvictims")
+ 
+
+    def __repr__(self):
+        return self.host
 
 
 class Configs(Model):

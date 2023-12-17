@@ -6,3 +6,4 @@ wtforms==3.0.1
 tldextract
 bs4
 tldextract
+pysocks
