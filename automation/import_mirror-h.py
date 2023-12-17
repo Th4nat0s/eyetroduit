@@ -90,7 +90,7 @@ for report in reports:
     # Effectuer la requête POST
     response = requests.post(api_url, json=data)
 
-    # Vérifier la réponse
+    # Vérifier la reponse
     if response.status_code == 200:
         print("La requête POST a été réussie.")
     else:

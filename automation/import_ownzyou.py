@@ -120,7 +120,7 @@ if response.status_code == 200:
         adversary = re.sub(r'[^\w\s]', '', adversary)
         adversary = adversary.rstrip()
 
-        id_number = "https://ownzyou.com/zone/189970" + item[0]
+        id_number = "https://ownzyou.com/zone/" + item[0]
         timestamp = item[6]
 
         # Convertir la chaîne en objet datetime
