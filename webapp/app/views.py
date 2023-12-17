@@ -521,6 +521,66 @@ class ClaimedVictimsView(ModelView):
             return jsonify({'error': 'No changes, invalid api key'}), 401
 
 
+    '''
+    $ curl -X POST -H "Content-Type: application/json" -d '{"api_key": "zoubida", "count": 1 }' http://127.0.0.1:5000/claimedvictimsview/api_process_claimed_victim
+
+    Api simple, qui traine "N" report de checkhost victim et scrap checkhostvictim pour la resolution
+    Doit etre crontabé quelque part.. pour faire faier le taff a la db
+    '''
+    @expose('/api_process_claimed_victim', methods=['POST'])
+    def api_process_claimed_victim(self):
+        '''
+        Route API pour processer les victimes de DDOS la db automagiquement.
+        '''
+        # Récupérez le JSON
+        data = request.get_json()
+        auth_valid = None
+
+        # check minima
+        if 'api_key' in data and 'count' in data:
+            key = data['api_key']
+            # check Api KEy
+            auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+        if auth_valid:
+            count = data['count']
+            count = int(count)  # surement mieux a faire pour s'assurer d'un INT
+            if count > 50: # Hard limit
+                count = 50
+            # Arrivé ici on sais combien on va en traiter.
+            candidates = db.session.query(ClaimedVictims).filter(ClaimedVictims.status == 0).limit(count)
+            print (candidates)
+            if candidates: # parce que ptet y a rien a faire....
+                for candidate in candidates:
+                    try:
+                        candidate.domain = tldextract.extract(candidate.fullurl).domain + "." + tldextract.extract(candidate.fullurl).suffix # Get domain info
+                        prefix = tldextract.extract(candidate.fullurl).subdomain
+                        if prefix:
+                            host = tldextract.extract(candidate.fullurl).subdomain +"."+ candidate.domain
+                        else:
+                            host = candidate.domain
+                        ips = checkhost.resolveall(host)
+                        print( host )
+                        print (ips)
+                        candidate.host = host
+                        if ips: # resoud lat long de la première IP qu'on vois.
+                            first_ip = ips[0]
+                            print (first_ip)
+                            geoinfo = getandparse.ip2geo(first_ip)
+                            candidate.country = geoinfo.country.name
+                            candidate.lat = geoinfo.location.latitude
+                            candidate.lon =  geoinfo.location.longitude
+                        candidate.ip = ', '.join(ips)
+                        candidate.status = 2  # Code 2 all good
+                    except:
+                        # Resolution ratée, mais testé on passe en code 1
+                        candidate.status = 1
+                    db.session.commit()
+
+            return jsonify({'success': 'DDOS report updated'}), 200
+        else:
+            return jsonify({'error': 'No changes, invalid api key'}), 401
+
+
 
 
 class api(BaseView):
