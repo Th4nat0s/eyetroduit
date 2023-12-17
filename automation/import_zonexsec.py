@@ -80,7 +80,7 @@ del socks
 for report in reports:
     print(report)
     # Convertir la date en format requis
-    date_object = datetime.strptime(report.get('date'), "%d/%m/%Y")
+    date_object = datetime.strptime(report.get('date'), "%Y-%m-%d %H:%M:%S")
     formatted_date = date_object.strftime("%Y-%m-%d %H:%M:%S")
 
     # Construire le dictionnaire avec les valeus
@@ -94,8 +94,8 @@ for report in reports:
     }
 
     # URL de l'API
-    api_url = "https://xakep.in/eyetroduit/claimedvictimsview/api_claimed_victim"
-    # api_url = "http://127.0.0.1:5000/claimedvictimsview/api_claimed_victim"
+    # api_url = "https://xakep.in/eyetroduit/claimedvictimsview/api_claimed_victim"
+    api_url = "http://127.0.0.1:5000/claimedvictimsview/api_claimed_victim"
 
     # Effectuer la requête POST
     response = requests.post(api_url, json=data)
