@@ -502,6 +502,9 @@ class ClaimedVictimsView(ModelView):
 
             # Récupération de la source
             source = db.session.query(Medias).filter(Medias.id == data['source']).first()
+            if not source:
+                return jsonify({'error': 'This source not found'}), 400
+
 
             # Arrivé ici c'est bon, ajout du Claim record
             new_victim = ClaimedVictims(timestamp=date, media=source, fullurl=data['target'], adversary=data['adversary'], reference=data['reference'] )  # Create new record
