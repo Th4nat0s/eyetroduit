@@ -1,2 +1,3 @@
+47 */8 * * * sleep `shuf -i 1-10 -n 1`m && cd /root/eyetroduit/automation && python3 ./import_ownzyou.py > /root/eyetroduit/automation/debug_lastrun_ownzyou.txt 2>&1
 47 */1 * * * sleep `shuf -i 1-10 -n 1`m && cd /root/eyetroduit/automation && python3 ./import_mirror-h.py > /root/eyetroduit/automation/debug_lastrun_mirror-h.txt 2>&1
 47 */16 * * * sleep `shuf -i 1-10 -n 1`m && cd /root/eyetroduit/automation && python3 ./import_deepdarkcti.py > /root/eyetroduit/automation/debug_lastrun_deepdarkcti.txt 2>&1
