@@ -102,7 +102,7 @@ for report in reports:
 
     # Vérifier la reponse
     if response.status_code == 200:
-        print("La requête POST a été réussie.")
+        print("La requete POST a ete reussie.")
     else:
-        print(f"Erreur lors de la requête POST. Code de statut : {response.status_code}")
+        print(f"Erreur lors de la requete POST. Code de statut : {response.status_code}")
         print(response.text)
