@@ -82,11 +82,13 @@ if archives_title:
                 print("Balise <div class='col-md-12 mt-2'> non trouvée.")
 
             # Imprimer les informations extraites
+            '''
             print(f"Defacer: {defacer}")
             print(f"Timestamp: {timestamp}")
             print(f"Mirror Link: {mirror_link}")
             print(f"Domain URL: {domain_url}")
             print("-----")
+            '''
             reports.append({"date": timestamp, "adversary": defacer, 'target': domain_url, 'reference': mirror_link})
 else:
     print("Balise <h6 class='card-title'>Archives</h6> non trouvée.")
@@ -126,7 +128,7 @@ for report in reports:
 
     # Vérifier la reponse
     if response.status_code == 200:
-        print("La requête POST a été réussie.")
+        print("La requete POST a ete reussie.")
     else:
-        print(f"Erreur lors de la requête POST. Code de statut : {response.status_code}")
+        print(f"Erreur lors de la requete POST. Code de statut : {response.status_code}")
         print(response.text)
