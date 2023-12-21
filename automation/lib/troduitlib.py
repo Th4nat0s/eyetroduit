@@ -9,6 +9,7 @@ import socket
 import json
 from datetime import datetime
 import yaml
+import sys
 
 
 def get_api_token():
@@ -33,7 +34,7 @@ def get_api_url():
 
 def post_victims(reports, source):
     '''
-    Post to eyetroduit victims collected
+    Post to eyetroduit victims collected, without TOR
     reports array of reports
     source integer communication source type ( mediaviews )
     '''
@@ -58,7 +59,7 @@ def post_victims(reports, source):
             "datetime": report.get('datetime'), # formatted_date,
             "source": source
         }
-        print(data)
+        sys.stdout.buffer.write(str(data).encode('utf-8'))
 
         # URL de l'API
         api_url = get_api_url() + "/claimedvictimsview/api_claimed_victim"

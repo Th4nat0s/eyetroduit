@@ -6,20 +6,7 @@ import re
 from datetime import datetime
 import socks
 import socket
-<<<<<<< HEAD
 from lib import troduitlib
-=======
-import sys
-
-# Charger la configuration depuis le fichier YAML
-with open('config.yaml', 'r') as yaml_file:
-    config = yaml.safe_load(yaml_file)
-
-    # Récupérer la valeur du token depuis la configuration
-    token = config.get('token', 'default_value_if_not_present')
-
-
->>>>>>> 110410fd837c15d563fc026e658a37e814f22fba
 
 url = 'https://ownzyou.com/inc/ajax/archive.php'
 headers = {
@@ -103,65 +90,7 @@ def scrap():
 
     response = requests.get(url, headers=headers, params=params)
 
-<<<<<<< HEAD
     results = []
-=======
-        # BeautifulSoup pour extraire le texte brut des balises HTML
-        target_soup = BeautifulSoup(target_html, 'html.parser')
-        adversary_soup = BeautifulSoup(adversary_html, 'html.parser')
-
-        # Obtenez le texte brut sans balises HTML
-        target = target_soup.find('a')['href']
-        adversary = adversary_soup.get_text()
-
-        # Retirer les caractères spécifiques tels que "✓"
-        adversary = re.sub(r'[^\w\s]', '', adversary)
-        adversary = adversary.rstrip()
-
-        id_number = "https://ownzyou.com/zone/" + item[0]
-        timestamp = item[6]
-
-        # Convertir la chaîne en objet datetime
-        date_object = datetime.strptime(timestamp, "%d/%m/%Y %H:%M")
-        # Formater la date dans le nouveau format
-        timestamp = date_object.strftime("%Y-%m-%d %H:%M:%S")
-
-        results.append({"target": target, "adversary": adversary, "reference": id_number, "timestamp": timestamp})
-
-else:
-    print(f"Error: {response.status_code}")
-    print(response.text)
-
-# Remove sock connections
-socks.setdefaultproxy()
-socks.socksocket = socket._socket
-session_without_proxy = requests.Session()
-del socks
-
-for report in results:
-    # Print report exclate a cause de l'utf sur cron
-    sys.stdout.buffer.write(str(report).encode('utf-8'))
-
-    # Convertir la date en format requis
-    # Construire le dictionnaire avec les valeus
-    data = {
-        "api_key": token,
-        "adversary": report.get('adversary'),
-        "target": report.get('target'),
-        "reference": report.get('reference'),
-        "datetime": report.get('timestamp'),
-        "source": 5
-    }
-
-    # URL de l'API
-    api_url = "https://xakep.in/eyetroduit/claimedvictimsview/api_claimed_victim"
-    # api_url = "http://127.0.0.1:5000/claimedvictimsview/api_claimed_victim"
-
-    # Effectuer la requête POST
-    response = requests.post(api_url, json=data)
-
-    # Vérifier la réponse
->>>>>>> 110410fd837c15d563fc026e658a37e814f22fba
     if response.status_code == 200:
         data = response.json()
         # Extrayez les données nécessaires
