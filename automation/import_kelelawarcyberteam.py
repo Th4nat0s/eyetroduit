@@ -11,6 +11,7 @@ import json
 from datetime import datetime
 import yaml
 import re
+import sys
 
 # Charger la configuration depuis le fichier YAML
 with open('config.yaml', 'r') as yaml_file:
@@ -94,8 +95,6 @@ else:
     print("Balise <h6 class='card-title'>Archives</h6> non trouvée.")
 
 
-print (reports)
-
 # Remove sock connections
 socks.setdefaultproxy()
 socks.socksocket = socket._socket
@@ -104,7 +103,7 @@ del socks
 
 
 for report in reports:
-    print(report)
+    sys.stdout.buffer.write(str(report).encode('utf-8'))
     # Convertir la date en format requis
     date_object = datetime.strptime(report.get('date'), "%Y-%m-%d %H:%M:%S")
     formatted_date = date_object.strftime("%Y-%m-%d %H:%M:%S")

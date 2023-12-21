@@ -7,7 +7,7 @@ from datetime import datetime
 import yaml
 import socks
 import socket
-
+import sys
 
 # Charger la configuration depuis le fichier YAML
 with open('config.yaml', 'r') as yaml_file:
@@ -141,7 +141,9 @@ session_without_proxy = requests.Session()
 del socks
 
 for report in results:
-    print(report)
+    # Print report exclate a cause de l'utf sur cron
+    sys.stdout.buffer.write(str(report).encode('utf-8'))
+
     # Convertir la date en format requis
     # Construire le dictionnaire avec les valeus
     data = {
