@@ -10,6 +10,7 @@ import json
 from datetime import datetime
 import yaml
 import re
+import sys
 
 
 
@@ -136,5 +137,44 @@ else:
     print("Balise <h6 class='card-title'>Archives</h6> non trouvee.")
 
 
+<<<<<<< HEAD
 print (reports)
 submit(reports):
+=======
+# Remove sock connections
+socks.setdefaultproxy()
+socks.socksocket = socket._socket
+session_without_proxy = requests.Session()
+del socks
+
+
+for report in reports:
+    sys.stdout.buffer.write(str(report).encode('utf-8'))
+    # Convertir la date en format requis
+    date_object = datetime.strptime(report.get('date'), "%Y-%m-%d %H:%M:%S")
+    formatted_date = date_object.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Construire le dictionnaire avec les valeus
+    data = {
+        "api_key": token,
+        "adversary": report.get('adversary'),
+        "target": report.get('target'),
+        "reference": report.get('reference'),
+        "datetime": formatted_date,
+        "source": 7
+    }
+
+    # URL de l'API
+    api_url = "https://xakep.in/eyetroduit/claimedvictimsview/api_claimed_victim"
+    # api_url = "http://127.0.0.1:5000/claimedvictimsview/api_claimed_victim"
+
+    # Effectuer la requête POST
+    response = requests.post(api_url, json=data)
+
+    # Vérifier la reponse
+    if response.status_code == 200:
+        print("La requete POST a ete reussie.")
+    else:
+        print(f"Erreur lors de la requete POST. Code de statut : {response.status_code}")
+        print(response.text)
+>>>>>>> 110410fd837c15d563fc026e658a37e814f22fba
