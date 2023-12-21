@@ -1,1 +1,2 @@
 token: mywebsitetoken
+api_url: http://website.url/basepath

@@ -4,19 +4,9 @@ import json
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
-import yaml
 import socks
 import socket
-
-
-# Charger la configuration depuis le fichier YAML
-with open('config.yaml', 'r') as yaml_file:
-    config = yaml.safe_load(yaml_file)
-
-    # Récupérer la valeur du token depuis la configuration
-    token = config.get('token', 'default_value_if_not_present')
-
-
+from lib import troduitlib
 
 url = 'https://ownzyou.com/inc/ajax/archive.php'
 headers = {
@@ -93,77 +83,52 @@ params = {
     'search[regex]': 'false'
 }
 
-# Set up Tor proxy
-socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
 
-response = requests.get(url, headers=headers, params=params)
+def scrap():
+    # Set up Tor proxy
+    socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
 
-results = []
-if response.status_code == 200:
-    data = response.json()
-    # Extrayez les données nécessaires
-    for item in data['data']:
-        target_html = item[3]  # Exemple: 'https://bppd.malangkota.go.id/wp-content'
-        adversary_html = item[2]  # Exemple: 'CyberzForum'
-        id_number = item[0]  # Exemple: '189969'
-        timestamp = item[6]  # Exemple: '27/09/2023 10:04'
+    response = requests.get(url, headers=headers, params=params)
 
-        # BeautifulSoup pour extraire le texte brut des balises HTML
-        target_soup = BeautifulSoup(target_html, 'html.parser')
-        adversary_soup = BeautifulSoup(adversary_html, 'html.parser')
-
-        # Obtenez le texte brut sans balises HTML
-        target = target_soup.find('a')['href']
-        adversary = adversary_soup.get_text()
-
-        # Retirer les caractères spécifiques tels que "✓"
-        adversary = re.sub(r'[^\w\s]', '', adversary)
-        adversary = adversary.rstrip()
-
-        id_number = "https://ownzyou.com/zone/" + item[0]
-        timestamp = item[6]
-
-        # Convertir la chaîne en objet datetime
-        date_object = datetime.strptime(timestamp, "%d/%m/%Y %H:%M")
-        # Formater la date dans le nouveau format
-        timestamp = date_object.strftime("%Y-%m-%d %H:%M:%S")
-
-        results.append({"target": target, "adversary": adversary, "reference": id_number, "timestamp": timestamp})
-
-else:
-    print(f"Error: {response.status_code}")
-    print(response.text)
-
-# Remove sock connections
-socks.setdefaultproxy()
-socks.socksocket = socket._socket
-session_without_proxy = requests.Session()
-del socks
-
-for report in results:
-    print(report)
-    # Convertir la date en format requis
-    # Construire le dictionnaire avec les valeus
-    data = {
-        "api_key": token,
-        "adversary": report.get('adversary'),
-        "target": report.get('target'),
-        "reference": report.get('reference'),
-        "datetime": report.get('timestamp'),
-        "source": 5
-    }
-
-    # URL de l'API
-    api_url = "https://xakep.in/eyetroduit/claimedvictimsview/api_claimed_victim"
-    # api_url = "http://127.0.0.1:5000/claimedvictimsview/api_claimed_victim"
-
-    # Effectuer la requête POST
-    response = requests.post(api_url, json=data)
-
-    # Vérifier la réponse
+    results = []
     if response.status_code == 200:
-        print("La requete POST a ete reussie.")
+        data = response.json()
+        # Extrayez les données nécessaires
+        for item in data['data']:
+            target_html = item[3]  # Exemple: 'https://bppd.malangkota.go.id/wp-content'
+            adversary_html = item[2]  # Exemple: 'CyberzForum'
+            id_number = item[0]  # Exemple: '189969'
+            timestamp = item[6]  # Exemple: '27/09/2023 10:04'
+
+            # BeautifulSoup pour extraire le texte brut des balises HTML
+            target_soup = BeautifulSoup(target_html, 'html.parser')
+            adversary_soup = BeautifulSoup(adversary_html, 'html.parser')
+
+            # Obtenez le texte brut sans balises HTML
+            target = target_soup.find('a')['href']
+            adversary = adversary_soup.get_text()
+
+            # Retirer les caractères spécifiques tels que "✓"
+            adversary = re.sub(r'[^\w\s]', '', adversary)
+            adversary = adversary.rstrip()
+
+            id_number = "https://ownzyou.com/zone/" + item[0]
+            timestamp = item[6]
+
+            # Convertir la chaîne en objet datetime
+            date_object = datetime.strptime(timestamp, "%d/%m/%Y %H:%M")
+            # Formater la date dans le nouveau format
+            rdatetime  = date_object.strftime("%Y-%m-%d %H:%M:%S")
+
+            results.append({"target": target, "adversary": adversary, "reference": id_number, "datetime": rdatetime})
+
     else:
-        print(f"Erreur lors de la requete POST. Code de statut : {response.status_code}")
+        print(f"Error: {response.status_code}")
         print(response.text)
 
+    return(results)
+
+
+if __name__ == '__main__':
+    results = scrap()
+    troduitlib.post_victims(results, 5)
