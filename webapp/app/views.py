@@ -367,7 +367,7 @@ class CheckhostVictimsView(ModelView):
             if candidates: # parce que ptet y a rien a faire....
                 for candidate in candidates:
                     try:
-                        host = checkhost.checkhost(candidate.checkhost)
+                        host = checkhost.checkhost2fqdn(candidate.checkhost)
                         candidate.domain = tldextract.extract(host).domain + "." + tldextract.extract(host).suffix # Get domain info
                         ips = checkhost.resolveall(host)
                         candidate.host = host
@@ -427,10 +427,28 @@ class CheckhostVictimsView(ModelView):
             if not valid_time_format(date):
                 return jsonify({'error': 'datetime invalid'}), 400  # je dis pas apikey invalid sinon un pentest me fera chier.
 
+            # Il y a 3 type de check-host possible
+            '''
+            "https://check-host.cc/report?u=417d7d7a-7baf-4e3f-8dfe-c6f56402a8f2"
+            "https://check-host.cc/report?u=6ac73fd7-9be9-4766-a8e3-52a6b1e73da7"
+
+            "https://check-host.net/check-report/12ccafb1ke1d"
+            "https://check-host.net/check-report/12546cc8k366"
+
+            "https://check-host.net/check-http?host=https://edupedia.co.il/&csrf_token=2cee683281373a371d43e65f5ca33ecfd14cccd1"
+            "https://check-host.net/check-http?host=https://police.gov.in/&csrf_token=be5001c1c945a1cb7e488ea94cc9db38ba5bcaef"
+
+            si c'est check-report on le mange direct.
+            Si c'est check-http on récupère quele parameter host on gicle le reste.
+            Si c'est .cc/report on recuper le "u".
+            '''
             # check du format de "checkhost"
-            pattern = re.compile(r'^https:\/\/check-host\.net\/check-report\/.*$')
-            if not pattern.match(checkhost):
+            val_pattern = re.compile(r"((https?:\/\/)?check-host.(net|cc)\/(check-report\/[a-z0-9]{12}+|check-http\?(host|csrf_token)=[\w\d:\.\/%]*&(host|csrf_token)=[\w\d:\.\/%]*|report\?u=[\da-f\-]*))")
+            # pattern = re.compile(r'^https:\/\/check-host\.net\/check-report\/.*$')
+            if not val_pattern.match(checkhost):
+                # check du format de "checkhost"
                 return jsonify({'error': 'Invalid CheckHost url'}), 400
+
 
             # Arrivé ici, est-ce que ce record est déja enregistré
             # Same time, Same chan, Same Checkhost
