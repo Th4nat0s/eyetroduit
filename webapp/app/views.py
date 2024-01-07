@@ -642,7 +642,7 @@ class api(BaseView):
             return jsonify({"error": str(e)}), 400
 
     @expose('/recent_reports', methods=['POST'])
-    def push(self):
+    def recent_reports(self):
         try:
             '''
             Route API pour ajouter une nouvelle victime dans la db automagiquement.
