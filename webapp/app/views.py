@@ -18,7 +18,7 @@ import re
 import os
 import json
 import tldextract
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def valid_time_format(string):
     format_attendu = "%Y-%m-%d %H:%M:%S"
@@ -566,7 +566,7 @@ class ClaimedVictimsView(ModelView):
                 count = 50
             # Arrivé ici on sais combien on va en traiter.
             candidates = db.session.query(ClaimedVictims).filter(ClaimedVictims.status == 0).limit(count)
-            print (candidates)
+            # print (candidates)
             if candidates: # parce que ptet y a rien a faire....
                 for candidate in candidates:
                     try:
@@ -623,6 +623,44 @@ class api(BaseView):
         except Exception as e:
             print(str(e))
             return jsonify({"error": str(e)}), 400
+
+    @expose('/recent_reports', methods=['POST'])
+    def push(self):
+        try:
+            '''
+            Route API pour ajouter une nouvelle victime dans la db automagiquement.
+            '''
+            # Récupérez le JSON
+            data = request.get_json()
+            auth_valid = None
+
+            # check minima
+            if 'api_key' in data:
+                key = data['api_key']
+                # check Api KEy
+                auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
+            if auth_valid:
+                # Write Header
+                content = "# Attack Summary from the last 24h\n"
+                content += "# Generated at server time {stime}\n"
+                last24 =  datetime.now() - timedelta(hours=24)
+
+                # Select last 24h Claims
+                victims = db.session.query(ClaimedVictims).filter(ClaimedVictims.status == 2, ClaimedVictims.timestamp > last24).limit(500) 
+
+                # Nice one liner text for each victims
+                for victim in victims:
+                    content += f"An adversary who goes by the name {victim.adversary} claims responsibility for compromising the site {victim.host}, "
+                    content += f"accessible at the IP addresses {victim.ip}. They have submitted evidence on the site {victim.reference} on "
+                    formatted_date = victim.timestamp.strftime("%A %d %B, at %H:%Mh")
+                    content += f"{formatted_date}\n"
+                return Response(content, mimetype='text/plain')
+            content = "Bad Api Key"
+            return Response(content, mimetype='text/plain'), 401
+        except Exception as e:
+            print(str(e))
+            content = "error:" + str(e)
+            return Response(content, mimetype='text/plain'), 500
 
 
 
