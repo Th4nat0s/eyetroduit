@@ -20,6 +20,23 @@ import json
 import tldextract
 from datetime import datetime, timedelta
 
+
+def manyip(string):
+    if len(string.split(','))>1:
+        return("es")
+    return("")
+
+
+def eng_date(subdate):
+    '''
+        print date in english for sentences
+        in: a python time.
+    '''
+    day = subdate.day
+    suffix = "th" if 11 <= day <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    return(subdate.strftime(f"%A %d{suffix} %B"))
+
+
 def valid_time_format(string):
     format_attendu = "%Y-%m-%d %H:%M:%S"
     try:
@@ -641,19 +658,27 @@ class api(BaseView):
                 auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
             if auth_valid:
                 # Write Header
+                last24 =  datetime.now() - timedelta(hours=24000)
                 content = "# Attack Summary from the last 24h\n"
-                content += "# Generated at server time {stime}\n"
-                last24 =  datetime.now() - timedelta(hours=24)
+                content += f"# All events since {last24}\n"
 
                 # Select last 24h Claims
-                victims = db.session.query(ClaimedVictims).filter(ClaimedVictims.status == 2, ClaimedVictims.timestamp > last24).limit(500) 
-
-                # Nice one liner text for each victims
+                victims = db.session.query(ClaimedVictims).filter(ClaimedVictims.status == 2, ClaimedVictims.timestamp > last24).limit(500)
+                # Nice one liner text for each DFACE victims
                 for victim in victims:
                     content += f"An adversary who goes by the name {victim.adversary} claims responsibility for compromising the site {victim.host}, "
-                    content += f"accessible at the IP addresses {victim.ip}. They have submitted evidence on the site {victim.reference} on "
-                    formatted_date = victim.timestamp.strftime("%A %d %B, at %H:%Mh")
-                    content += f"{formatted_date}\n"
+                    content += f"accessible at the IP address{manyip(victim.ip)} {victim.ip}. They submitted evidence on the site {victim.reference} on "
+                    formatted_time = victim.timestamp.strftime("%H:%Mh")
+                    content += f"{eng_date(victim.timestamp)} at {formatted_time}\n"
+
+                victims = db.session.query(CheckhostVictims).filter(CheckhostVictims.status == 2, CheckhostVictims.timestamp > last24).limit(500)
+                # Nice one liner text for each DDOS victims
+                for victim in victims:
+                    content += f"An adversary claims responsibility for a DDOS attack on the site {victim.host}. They used the following online "
+                    content += f"check services {victim.checkhost} "
+                    content += f"to prove their claims. The site resolves to the IP "
+                    content += f"address{manyip(victim.ip)} {victim.ip}. They have submitted revendication message on the Telegram channel "
+                    content += f"{victim.checkhostvictim_comm} on {eng_date(victim.timestamp)}\n"
                 return Response(content, mimetype='text/plain')
             content = "Bad Api Key"
             return Response(content, mimetype='text/plain'), 401
