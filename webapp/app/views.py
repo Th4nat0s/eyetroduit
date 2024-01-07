@@ -658,7 +658,7 @@ class api(BaseView):
                 auth_valid = db.session.query(ApiKeys).filter(ApiKeys.key == key, ApiKeys.active == True).first()
             if auth_valid:
                 # Write Header
-                last24 =  datetime.now() - timedelta(hours=24000)
+                last24 =  datetime.now() - timedelta(hours=24)
                 content = "# Attack Summary from the last 24h\n"
                 content += f"# All events since {last24}\n"
 
